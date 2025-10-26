@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+
+:root {
+	--page-bg: url('/bg.jpg') center/cover no-repeat fixed;
+}
+
+body {
+	margin: 0;
+	background: var(--page-bg);
+}
+
+header {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+}
+
+header::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: var(--page-bg); /* Ensuring it is opaque */
+}
+
+header > * {
+	position: relative;
+	z-index: 1;
+}
