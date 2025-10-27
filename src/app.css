@@ -1,12 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 @import 'tailwindcss';
 
+@theme {
+	--font-dm-sans: 'DM Sans', sans-serif;
+}
+
 :root {
-	--page-bg: url('/bg.jpg') center/cover no-repeat fixed;
+	--bg: url('/bg.jpg');
+	--bg-y: 0px;
+	--html-bg-size: 175%;
+}
+
+html {
+	scroll-snap-type: y mandatory;
+	background-position-y: calc(var(--bg-y));
 }
 
 body {
 	margin: 0;
-	background: var(--page-bg);
 }
 
 header {
@@ -14,14 +25,6 @@ header {
 	top: 0;
 	z-index: 100;
 }
-
-header::before {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background: var(--page-bg); /* Ensuring it is opaque */
-}
-
 header > * {
 	position: relative;
 	z-index: 1;
