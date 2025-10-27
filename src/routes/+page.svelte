@@ -1,40 +1,45 @@
 <script lang="ts">
 	import { projects } from '$lib/data/projects';
 	import ProjectBanner from '$lib/components/ProjectBanner.svelte';
+	import { onMount } from 'svelte';
+
+	const scrollIntoViewOptions: ScrollIntoViewOptions = { behavior: 'smooth', block: 'center' };
 
 	let mainDivElement: HTMLDivElement;
-
-	let isScrolling = false;
 	let projectRefs: { [key: string]: ProjectBanner } = {};
+	let isScrollingToBanner = false;
 
-	function preventUserWheelScroll(event: Event) {
+	function preventEvent(event: Event) {
 		event.preventDefault();
 	}
 
 	function handleClickOnBanner(id: string) {
-		if (isScrolling) return;
+		if (isScrollingToBanner) return;
 
-		isScrolling = true;
+		isScrollingToBanner = true;
 
-		mainDivElement.addEventListener('wheel', preventUserWheelScroll, { once: true });
+		mainDivElement.addEventListener('wheel', preventEvent, { once: true });
 
 		console.log('open project:', id);
 
-		projectRefs[id]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
+		//TODO: PREVENT FOR SAFARI !!!
 		document.addEventListener(
 			'scrollend',
 			() => {
-				mainDivElement.removeEventListener('wheel', preventUserWheelScroll);
-				isScrolling = false;
+				mainDivElement.removeEventListener('wheel', preventEvent);
+				isScrollingToBanner = false;
 			},
 			{ once: true }
 		);
 	}
+
+	onMount(() => {
+		projectRefs[0]?.scrollIntoView();
+	});
 </script>
 
-<div bind:this={mainDivElement} class="flex flex-col gap-6 px-8">
+<div bind:this={mainDivElement} class="flex flex-col gap-5 px-30 py-10">
 	{#each projects as p (p.id)}
-		<ProjectBanner bind:this={projectRefs[p.id]} project={p} openProject={handleClickOnBanner} />
+		<ProjectBanner bind:this={projectRefs[p.id]} project={p} onClickBanner={handleClickOnBanner} />
 	{/each}
 </div>

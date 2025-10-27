@@ -2,21 +2,21 @@
 	import type { ProjectData } from '$lib/data/projects';
 	interface Props {
 		project: ProjectData;
-		openProject: (id: string) => void;
+		onClickBanner: (id: string) => void;
 	}
-	let { project, openProject }: Props = $props();
+	let { project, onClickBanner }: Props = $props();
 
 	let buttonElement: HTMLButtonElement;
 
-	export function scrollIntoView(options?: ScrollIntoViewOptions) {
-		buttonElement?.scrollIntoView(options);
-		return buttonElement;
+	export function scrollIntoView() {
+		buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 	}
 
 	//TODO: since we use the scrollend event, prevent if user is using safari
 	function onClick() {
 		console.log('project banner clicked:', project.id);
-		openProject(project.id);
+		scrollIntoView();
+		onClickBanner(project.id);
 	}
 </script>
 
@@ -35,5 +35,5 @@
 		<span class="text-3xl">{project.dateSpan}</span>
 	</div>
 
-	<div class="min-h-[28vh] sm:min-h-[30vh] md:min-h-[32vh] lg:min-h-[75vh]"></div>
+	<div class="min-h-[28vh] sm:min-h-[30vh] md:min-h-[32vh] lg:min-h-[60vh]"></div>
 </button>
