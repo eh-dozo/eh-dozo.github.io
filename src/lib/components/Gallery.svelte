@@ -11,9 +11,10 @@
 </script>
 
 <div
+	class="px-[2lvw] py-4"
 	style={`display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},auto);`}
 >
 	{#each displayed as src, i (i)}
-		<img {src} alt={`image ${i + 1}`} />
+		<img {src} alt={`image ${i + 1}`} class="place-self-center p-3" />
 	{/each}
 </div>

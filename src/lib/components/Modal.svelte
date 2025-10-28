@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
+	import { X } from '@lucide/svelte';
 
 	interface ModalProps {
 		open: boolean;
@@ -38,8 +39,12 @@
 	aria-modal="true"
 	oncancel={handleCancel}
 	onclick={handleBackdropClick}
-	class="h-[80lvh] w-[82.5lvw] place-self-center"
+	class="h-lvh w-[82.5lvw] place-self-center rounded-[0.5lvw] border-2 bg-white/10 backdrop-blur-xl"
 >
-	<button type="button" onclick={onClose}>Close</button>
-	{@render children?.()}
+	<div class="flex flex-col">
+		<button type="button" onclick={onClose} class="self-end pt-[0.5lvh] pr-[0.6lvh]"
+			><X size="2lvw" /></button
+		>
+		{@render children?.()}
+	</div>
 </dialog>

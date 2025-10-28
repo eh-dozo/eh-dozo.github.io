@@ -86,33 +86,6 @@
 {#if modalOpen && selectedProjectId}
 	<Modal open={modalOpen} onClose={closeModal}>
 		{@const details = projectDetails[selectedProjectId]}
-		{#if details}
-			{#if details.arrangement === 'gallery-first'}
-				{#if details.gallery}
-					<Gallery
-						rows={details.gallery.rows}
-						cols={details.gallery.cols}
-						images={[...details.gallery.images]}
-					/>
-				{/if}
-				{#if details.paragraph}
-					<ParagraphBlock title={details.paragraph.title} text={details.paragraph.text} />
-				{/if}
-			{:else}
-				{#if details.paragraph}
-					<ParagraphBlock title={details.paragraph.title} text={details.paragraph.text} />
-				{/if}
-				{#if details.gallery}
-					<Gallery
-						rows={details.gallery.rows}
-						cols={details.gallery.cols}
-						images={[...details.gallery.images]}
-					/>
-				{/if}
-			{/if}
-		{:else}
-			<ParagraphBlock text="Placeholder content" />
-			<Gallery rows={1} cols={1} images={['/banners/pointclouds.jpeg']} />
-		{/if}
+		{#if details}{/if}
 	</Modal>
 {/if}
