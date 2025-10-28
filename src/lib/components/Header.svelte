@@ -11,8 +11,8 @@
 	}
 </script>
 
-<header class="sticky top-0 w-full text-3xl font-semibold {styleClasses} ">
-	<div class="flex items-center justify-end px-6.25 py-6">
+<header class="w-full text-3xl font-semibold {styleClasses} ">
+	<div class="flex items-center justify-center py-12.5">
 		<button
 			type="button"
 			class="translate-y-1.5 -rotate-90 text-7xl font-extrabold tracking-[-0.08em] text-white mix-blend-difference"

@@ -5,15 +5,15 @@
 	--font-dm-sans: 'DM Sans', sans-serif;
 }
 
+@utility no-scrollbar {
+	@apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
+
 :root {
 	--bg: url('/bg.jpg');
 	--bg-y: 0.5;
 	--html-bg-size: 150%;
-}
-
-html {
-	overscroll-behavior-y: none;
-	scroll-snap-type: y mandatory;
+	--gutter: 13rem;
 }
 
 body {

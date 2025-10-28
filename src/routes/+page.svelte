@@ -2,8 +2,14 @@
 	import { projects } from '$lib/data/projects';
 	import ProjectBanner from '$lib/components/ProjectBanner.svelte';
 	import { onMount } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 
 	let mainDivElement: HTMLDivElement;
+
+	const assignMain: Attachment<HTMLDivElement> = (node) => {
+		mainDivElement = node;
+	};
+
 	let projectRefs: { [key: string]: ProjectBanner } = {};
 	let isScrollingToBanner = false;
 
@@ -36,7 +42,13 @@
 	});
 </script>
 
-<div bind:this={mainDivElement} class="flex flex-col gap-8 px-30 pt-1 pb-75 will-change-scroll">
+<div
+	{@attach assignMain}
+	class="no-scrollbar flex h-full min-h-0 snap-y snap-mandatory flex-col gap-8 overflow-y-scroll py-50 will-change-scroll"
+	onscroll={() => {
+		document.documentElement.style.setProperty('--bg-y', `${-mainDivElement.scrollTop * 2.5}px`);
+	}}
+>
 	{#each projects as p (p.id)}
 		<ProjectBanner bind:this={projectRefs[p.id]} project={p} onClickBanner={handleClickOnBanner} />
 	{/each}

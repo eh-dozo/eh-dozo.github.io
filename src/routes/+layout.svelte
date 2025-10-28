@@ -2,17 +2,8 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Header from '$lib/components/Header.svelte';
-	import { onMount } from 'svelte';
 
 	let { children } = $props();
-
-	onMount(() => {
-		const handleScroll = () =>
-			document.documentElement.style.setProperty('--bg-y', `${-window.scrollY * 2.5}px`);
-		handleScroll();
-		window.addEventListener('scroll', handleScroll, { passive: true });
-		return () => window.removeEventListener('scroll', handleScroll);
-	});
 </script>
 
 <svelte:head>
@@ -27,9 +18,19 @@
 		bg-(image:--bg) bg-size-(--html-bg-size)"
 		style="background-position: center calc(var(--bg-y));"
 	></div>
-	<Header openProfile={() => console.log('open profile (stub)')} styleClasses="" />
 
-	<main>
-		{@render children?.()}
+	<main class="grid h-screen grid-cols-[var(--gutter,6rem)_1fr_var(--gutter,6rem)]">
+		<!-- Left gutter (non-scrollable) -->
+		<div class="overflow-hidden"></div>
+
+		<!-- Center content column (scrollable via page content) -->
+		<div class="h-full min-h-0">
+			{@render children?.()}
+		</div>
+
+		<!-- Right gutter with EH button (non-scrollable) -->
+		<div class="overflow-hidden">
+			<Header openProfile={() => console.log('open profile (stub)')} styleClasses="" />
+		</div>
 	</main>
 </div>

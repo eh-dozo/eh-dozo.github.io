@@ -25,7 +25,8 @@
 	bind:this={buttonElement}
 	type="button"
 	class="
-		relative isolate w-full
+	relative
+		isolate min-h-[60svh] w-full basis-[60svh]
 		cursor-pointer
 		snap-center snap-always scroll-m-50
 		overflow-hidden
@@ -36,7 +37,9 @@
 	onclick={onClick}
 >
 	<div class="absolute top-10 left-10 p-4">
-		<h2 class="text-8xl font-[550] tracking-tight text-white mix-blend-difference">
+		<h2
+			class="font-[550] tracking-tight text-white mix-blend-difference md:text-8xl lg:text-[156px]"
+		>
 			{project.title}
 		</h2>
 	</div>
@@ -44,6 +47,4 @@
 	<div class="absolute right-10 bottom-10 p-4 text-right">
 		<span class="text-3xl text-white mix-blend-difference">{project.dateSpan}</span>
 	</div>
-
-	<div class="min-h-[28vh] sm:min-h-[30vh] md:min-h-[32vh] lg:min-h-[60vh]"></div>
 </button>
