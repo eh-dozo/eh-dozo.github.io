@@ -19,7 +19,14 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div>
+<div class="relative">
+	<div
+		aria-hidden="true"
+		class="
+		pointer-events-none fixed inset-0 -z-10
+		bg-(image:--bg) bg-size-(--html-bg-size)"
+		style="background-position: center calc(var(--bg-y));"
+	></div>
 	<Header openProfile={() => console.log('open profile (stub)')} styleClasses="" />
 
 	<main>

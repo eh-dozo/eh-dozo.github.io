@@ -24,16 +24,25 @@
 <button
 	bind:this={buttonElement}
 	type="button"
-	class="relative w-full cursor-pointer snap-center overflow-hidden bg-cover bg-center text-left"
+	class="
+		relative isolate w-full
+		cursor-pointer
+		snap-center snap-always scroll-m-50
+		overflow-hidden
+		rounded-4xl bg-cover
+		bg-center
+		text-left"
 	style={`background-image: url('${project.image}')`}
 	onclick={onClick}
 >
 	<div class="absolute top-10 left-10 p-4">
-		<h2 class="text-8xl">{project.title}</h2>
+		<h2 class="text-8xl font-[550] tracking-tight text-white mix-blend-difference">
+			{project.title}
+		</h2>
 	</div>
 
 	<div class="absolute right-10 bottom-10 p-4 text-right">
-		<span class="text-3xl">{project.dateSpan}</span>
+		<span class="text-3xl text-white mix-blend-difference">{project.dateSpan}</span>
 	</div>
 
 	<div class="min-h-[28vh] sm:min-h-[30vh] md:min-h-[32vh] lg:min-h-[60vh]"></div>

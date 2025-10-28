@@ -12,23 +12,10 @@
 }
 
 html {
-	background-image: url('/bg.jpg');
-	background-size: var(--html-bg-size);
-	background-position: center calc(var(--bg-y));
 	overscroll-behavior-y: none;
 	scroll-snap-type: y mandatory;
 }
 
 body {
 	margin: 0;
-}
-
-header {
-	position: sticky;
-	top: 0;
-	z-index: 100;
-}
-header > * {
-	position: relative;
-	z-index: 1;
 }
