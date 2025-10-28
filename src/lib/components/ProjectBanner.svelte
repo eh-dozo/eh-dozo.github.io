@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type { ProjectData } from '$lib/data/projects';
-	interface Props {
+
+	interface ProjectBannerProps {
 		project: ProjectData;
 		onClickBanner: (id: string) => void;
 	}
-	let { project, onClickBanner }: Props = $props();
+	let { project, onClickBanner }: ProjectBannerProps = $props();
 
 	let buttonElement: HTMLButtonElement;
 

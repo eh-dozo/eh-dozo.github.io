@@ -3,8 +3,6 @@
 	import ProjectBanner from '$lib/components/ProjectBanner.svelte';
 	import { onMount } from 'svelte';
 
-	const scrollIntoViewOptions: ScrollIntoViewOptions = { behavior: 'smooth', block: 'center' };
-
 	let mainDivElement: HTMLDivElement;
 	let projectRefs: { [key: string]: ProjectBanner } = {};
 	let isScrollingToBanner = false;
