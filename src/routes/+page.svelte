@@ -36,7 +36,7 @@
 	});
 </script>
 
-<div bind:this={mainDivElement} class="flex flex-col gap-5 px-30 py-10">
+<div bind:this={mainDivElement} class="flex flex-col gap-8 px-30 pt-1 pb-75">
 	{#each projects as p (p.id)}
 		<ProjectBanner bind:this={projectRefs[p.id]} project={p} onClickBanner={handleClickOnBanner} />
 	{/each}

@@ -20,10 +20,7 @@
 </svelte:head>
 
 <div>
-	<Header
-		openProfile={() => console.log('open profile (stub)')}
-		styleClasses=""
-	/>
+	<Header openProfile={() => console.log('open profile (stub)')} styleClasses="" />
 
 	<main>
 		{@render children?.()}

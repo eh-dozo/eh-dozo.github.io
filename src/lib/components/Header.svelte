@@ -5,11 +5,7 @@
 		openProfile: () => void;
 		styleClasses: string;
 	}
-	let {
-		openProfile,
-		styleClasses
-	}: HeaderProps = $props();
-
+	let { openProfile, styleClasses }: HeaderProps = $props();
 
 	function onProfileClick() {
 		console.log('Eliot Hoff clicked');
@@ -17,11 +13,10 @@
 	}
 </script>
 
-<header
-	class="sticky top-0 z-10 w-full text-3xl font-semibold {styleClasses}"
->
-	<div class="flex items-center justify-between px-4 py-3 text-white">
-		<div>Portfolio</div>
-		<button type="button" onclick={onProfileClick}>Eliot Hoff</button>
+<header class="sticky top-0 z-10 w-full text-3xl font-semibold {styleClasses}">
+	<div class="flex items-center justify-end px-4 py-6 text-white">
+		<button type="button" 
+		class="text-7xl font-extrabold"
+		onclick={onProfileClick}>EH</button>
 	</div>
 </header>

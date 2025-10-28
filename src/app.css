@@ -12,9 +12,11 @@
 }
 
 html {
-	scroll-snap-type: y mandatory;
-	background-position-y: calc(var(--bg-y));
+	background-image: url('/bg.jpg');
+	background-size: var(--html-bg-size);
+	background-position: center calc(var(--bg-y));
 	overscroll-behavior-y: none;
+	scroll-snap-type: y mandatory;
 }
 
 body {
