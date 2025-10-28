@@ -13,7 +13,7 @@
 	--bg: url('/bg.jpg');
 	--bg-y: 0.5;
 	--html-bg-size: 150%;
-	--gutter: 13rem;
+	--gutter: 15lvw;
 }
 
 body {

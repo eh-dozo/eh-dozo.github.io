@@ -19,9 +19,9 @@
 		style="background-position: center calc(var(--bg-y));"
 	></div>
 
-	<main class="grid h-screen grid-cols-[var(--gutter,6rem)_1fr_var(--gutter,6rem)]">
+	<main class="grid h-screen grid-cols-[var(--gutter)_1fr_var(--gutter)]">
 		<!-- Left gutter (non-scrollable) -->
-		<div class="overflow-hidden"></div>
+		<div class="overflow-y-visible"></div>
 
 		<!-- Center content column (scrollable via page content) -->
 		<div class="h-full min-h-0">
@@ -29,8 +29,8 @@
 		</div>
 
 		<!-- Right gutter with EH button (non-scrollable) -->
-		<div class="overflow-hidden">
-			<Header openProfile={() => console.log('open profile (stub)')} styleClasses="" />
+		<div class="overflow-y-visible">
+			<Header openProfile={() => console.log('open profile (stub)')} />
 		</div>
 	</main>
 </div>

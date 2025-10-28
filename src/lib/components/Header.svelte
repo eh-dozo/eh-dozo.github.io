@@ -1,9 +1,8 @@
 <script lang="ts">
 	interface HeaderProps {
 		openProfile: () => void;
-		styleClasses: string;
 	}
-	let { openProfile, styleClasses }: HeaderProps = $props();
+	let { openProfile }: HeaderProps = $props();
 
 	function onProfileClick() {
 		console.log('Eliot Hoff clicked');
@@ -11,11 +10,11 @@
 	}
 </script>
 
-<header class="w-full text-3xl font-semibold {styleClasses} ">
-	<div class="flex items-center justify-center py-12.5">
+<header class="w-full">
+	<div class="flex items-center justify-center py-[7lvh]">
 		<button
 			type="button"
-			class="translate-y-1.5 -rotate-90 text-7xl font-extrabold tracking-[-0.08em] text-white mix-blend-difference"
+			class="-rotate-90 text-[7lvw] font-extrabold tracking-[-0.08em] text-white mix-blend-difference"
 			onclick={onProfileClick}
 			><span class="text-white font-stretch-expanded bg-blend-difference">EH</span></button
 		>
