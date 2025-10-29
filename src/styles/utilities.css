@@ -1,0 +1,16 @@
+@utility no-scrollbar {
+	@apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
+
+@utility underline-gradient {
+	@apply inline bg-[linear-gradient(to_right,white,white)] [box-decoration-break:clone] bg-size-[0%_0.1em] bg-position-[0_100%] bg-no-repeat [-webkit-box-decoration-break:clone] [transition:background-size_400ms_ease-out];
+}
+
+@utility underline-gradient-active {
+	@apply bg-size-[100%_0.1em];
+}
+
+@utility project-banner-hover {
+	margin: 0.5lvw;
+	box-shadow: 15px 15px 0.5lvw #cddc3950;
+}

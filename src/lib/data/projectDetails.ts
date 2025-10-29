@@ -22,7 +22,12 @@ export const projectDetails: Record<string, ProjectDetails> = {
 		paragraphs: [
 			{
 				title: 'Aquasolace',
-				text: 'A two-semester academic collaboration with NABU (Naturschutzbund Deutschland) Brandenburg, where I developed a environmental simulation / puzzle game.',
+				/** write it more like:
+				 * - a line for the type of project -> environmental simulation / puzzle game
+				 * - "" "" "" -> two-semester academic group project in collaboration with NABU (Naturschutzbund Deutschland) Brandenburg
+				 * - "" "" "" -> Contributions: Game Design, Game Code Implementation, 3D Models Animations
+				 */
+				text: 'A two-semester academic group project in collaboration with NABU (Naturschutzbund Deutschland) Brandenburg, with the goal to design and develop a environmental simulation / puzzle game.',
 				textJustify: 'right'
 			},
 			{

@@ -24,7 +24,7 @@
 		<div class="overflow-y-visible"></div>
 
 		<!-- Center content column (scrollable via page content) -->
-		<div class="h-full min-h-0">
+		<div class="z-10 h-full min-h-0">
 			{@render children?.()}
 		</div>
 

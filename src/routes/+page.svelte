@@ -8,6 +8,7 @@
 	import type { ProjectDetails } from '$lib/data/projectDetails';
 	import { onMount } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
+	import { ensureProjectImagesLoaded, getGalleryImages } from '$lib/util/projectImages';
 
 	let mainDivElement: HTMLDivElement;
 	const toMainDivElement: Attachment<HTMLDivElement> = (node) => {
@@ -19,12 +20,13 @@
 	let modalOpen = $state(false);
 	let selectedProjectId: string | null = $state(null);
 	let pendingProjectId: string | null = null;
+	let pendingAssetsProjectId: string | null = null;
 
 	function preventEvent(event: Event) {
 		event.preventDefault();
 	}
 
-	function openModalFor(id: string) {
+	async function openModalFor(id: string) {
 		console.log('Opening modal');
 		selectedProjectId = id;
 		modalOpen = true;
@@ -35,34 +37,52 @@
 		selectedProjectId = null;
 	}
 
-	function handleClickOnBanner(id: string, alreadyCentered: boolean) {
+	async function handleClickOnBanner(
+		id: string,
+		alreadyCentered: boolean,
+		assetsProjectId: string
+	) {
 		console.log('handle click: on banner with id: ', id, '; alreadyCentered: ', alreadyCentered);
 		if (isScrollingToBanner) {
 			console.log('handle click: Is already scrolling to banner');
 			return;
 		}
+
+		// deduped if already in-flight
+		const preloadPromise = ensureProjectImagesLoaded(assetsProjectId).catch(() => {});
+
 		if (alreadyCentered) {
 			console.log('handle click: is already centered');
+			await preloadPromise;
 			openModalFor(id);
 			return;
 		}
 
 		isScrollingToBanner = true;
 		pendingProjectId = id;
+		pendingAssetsProjectId = assetsProjectId;
 
 		mainDivElement.addEventListener('wheel', preventEvent, { once: true });
 
 		//TODO: PREVENT FOR SAFARI !!!
 		mainDivElement.addEventListener(
 			'scrollend',
-			() => {
+			async () => {
 				console.log('handle click: scroll end');
 				mainDivElement.removeEventListener('wheel', preventEvent);
 				isScrollingToBanner = false;
 
 				if (pendingProjectId) {
+					if (pendingAssetsProjectId) {
+						try {
+							await ensureProjectImagesLoaded(pendingAssetsProjectId);
+						} catch (e) {
+							void e;
+						}
+					}
 					openModalFor(pendingProjectId);
 					pendingProjectId = null;
+					pendingAssetsProjectId = null;
 				}
 			},
 			{ once: true }
@@ -110,13 +130,18 @@
 
 <div
 	{@attach toMainDivElement}
-	class="no-scrollbar flex h-full min-h-0 snap-y snap-mandatory flex-col gap-[2.5lvh] overflow-y-scroll py-[12.5lvh] will-change-scroll"
+	class="no-scrollbar flex h-full min-h-0 w-full snap-y snap-mandatory flex-col gap-[2.5lvh] overflow-y-scroll py-[12.5lvh] will-change-scroll"
 	onscroll={() => {
 		document.documentElement.style.setProperty('--bg-y', `${-mainDivElement.scrollTop * 2.5}px`);
 	}}
 >
 	{#each projects as p (p.id)}
-		<ProjectBanner project={p} onClickBanner={handleClickOnBanner} />
+		{@const detailsForBanner = projectDetails[p.id]}
+		<ProjectBanner
+			project={p}
+			imagesProjectId={detailsForBanner?.id ?? p.id}
+			onClickBanner={handleClickOnBanner}
+		/>
 	{/each}
 </div>
 
@@ -136,8 +161,7 @@
 					<Gallery
 						rows={item.data.maxRows}
 						cols={item.data.maxCols}
-						projectId={details.id}
-						galleryIndex={item.idx}
+						images={getGalleryImages(details.id, item.idx) ?? []}
 					/>
 				{/if}
 			{/each}

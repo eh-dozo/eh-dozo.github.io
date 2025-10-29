@@ -1,19 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 @import 'tailwindcss';
+@import './styles/animations.css';
+@import './styles/utilities.css';
 
 @theme {
 	--font-dm-sans: 'DM Sans', sans-serif;
-}
-
-@utility no-scrollbar {
-	@apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
 
 :root {
 	--bg: url('/bg.jpg');
 	--bg-y: 0.5;
 	--html-bg-size: 150%;
-	--gutter: 15lvw;
+	--gutter: 13.5lvw;
 }
 
 body {

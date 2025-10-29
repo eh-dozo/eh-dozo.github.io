@@ -1,17 +1,24 @@
 <script lang="ts">
 	import type { ProjectData } from '$lib/data/projects';
 	import type { Attachment } from 'svelte/attachments';
+	import { ensureProjectImagesLoaded, projectImagesStatus } from '$lib/util/projectImages';
 
 	interface ProjectBannerProps {
 		project: ProjectData;
-		onClickBanner: (id: string, alreadyCentered: boolean) => void;
+		imagesProjectId: string;
+		onClickBanner: (id: string, alreadyCentered: boolean, imagesProjectId: string) => void;
 	}
-	let { project, onClickBanner }: ProjectBannerProps = $props();
+	let { project, imagesProjectId, onClickBanner }: ProjectBannerProps = $props();
 
 	let buttonElement: HTMLButtonElement;
 	const toButtonElement: Attachment<HTMLButtonElement> = (node) => {
 		buttonElement = node;
 	};
+
+	let clickedWhileLoading: boolean = $state(false);
+	const shouldApplyLoadingStyle = $derived(
+		Boolean($projectImagesStatus[imagesProjectId]?.loading) && clickedWhileLoading
+	);
 
 	function isCentered(thresholdPx = 100) {
 		if (!buttonElement) return false;
@@ -21,34 +28,50 @@
 		return Math.abs(viewportCenterY - elementCenterY) <= thresholdPx;
 	}
 
+	function onMouseEnter() {
+		void ensureProjectImagesLoaded(imagesProjectId);
+	}
+
 	//TODO: since we use the scrollend event, prevent if user is using safari
 	function onClick() {
+		if ($projectImagesStatus[imagesProjectId]?.loading) {
+			clickedWhileLoading = true;
+		}
 		const centered = isCentered();
 		if (!centered) {
 			console.log('on project banner ', project.id, ' click: scroll into');
 			buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 		}
-		onClickBanner(project.id, centered);
+		onClickBanner(project.id, centered, imagesProjectId);
 	}
 </script>
 
-<!-- TODO on:hover, lazy-load the images of that project -->
 <button
 	{@attach toButtonElement}
 	type="button"
-	class="relative isolate min-h-[60lvh] w-full basis-[60lvh] cursor-pointer snap-center snap-always overflow-hidden rounded-[2lvw] bg-cover bg-center text-left"
+	class="group relative isolate mx-[2lvw] min-h-[60lvh] basis-[60lvh] cursor-pointer snap-center snap-always overflow-visible rounded-[2lvw] bg-cover bg-center text-left transition-all duration-500 ease-in-out hover:project-banner-hover {shouldApplyLoadingStyle
+		? 'animate-size-pulse'
+		: ''}"
+	class:cursor-progress={shouldApplyLoadingStyle}
 	style={`background-image: url('${project.image}')`}
+	onmouseenter={onMouseEnter}
 	onclick={onClick}
 >
 	<div class="absolute top-[5lvh] left-[4lvw]">
 		<h2
-			class="text-[9lvw] leading-[20vh] font-[550] tracking-tight text-white mix-blend-difference"
+			class="underline-gradient text-[9lvw] leading-[20vh] font-[550] tracking-tight text-white mix-blend-difference group-hover:underline-gradient-active {shouldApplyLoadingStyle
+				? 'animate-opacity-pulse'
+				: ''}"
 		>
 			{project.title}
 		</h2>
 	</div>
 
 	<div class="absolute right-[3lvw] bottom-[4lvh] text-right">
-		<span class="text-[2lvw] font-light text-white mix-blend-difference">{project.dateSpan}</span>
+		<span
+			class="underline-gradient text-[2lvw] font-light text-white mix-blend-difference group-hover:underline-gradient-active {shouldApplyLoadingStyle
+				? 'animate-opacity-pulse'
+				: ''}">{project.dateSpan}</span
+		>
 	</div>
 </button>
