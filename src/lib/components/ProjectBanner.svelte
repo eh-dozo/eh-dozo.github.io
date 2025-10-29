@@ -32,6 +32,7 @@
 	}
 </script>
 
+<!-- TODO on:hover, lazy-load the images of that project -->
 <button
 	{@attach toButtonElement}
 	type="button"
@@ -48,8 +49,6 @@
 	</div>
 
 	<div class="absolute right-[3lvw] bottom-[4lvh] text-right">
-		<span class="text-[2lvw] font-extralight text-white mix-blend-difference"
-			>{project.dateSpan}</span
-		>
+		<span class="text-[2lvw] font-light text-white mix-blend-difference">{project.dateSpan}</span>
 	</div>
 </button>

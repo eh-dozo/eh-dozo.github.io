@@ -5,6 +5,7 @@
 	import ParagraphBlock from '$lib/components/ParagraphBlock.svelte';
 	import Gallery from '$lib/components/Gallery.svelte';
 	import { projectDetails } from '$lib/data/projectDetails';
+	import type { ProjectDetails } from '$lib/data/projectDetails';
 	import { onMount } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 
@@ -68,6 +69,42 @@
 		);
 	}
 
+	type Paragraph = NonNullable<ProjectDetails['paragraphs']>[number];
+	type GalleryGroup = NonNullable<ProjectDetails['galleries']>[number];
+	type ContentItem =
+		| { kind: 'paragraph'; idx: number; data: Paragraph }
+		| { kind: 'gallery'; idx: number; data: GalleryGroup };
+
+	function composeContent(details: ProjectDetails): ContentItem[] {
+		const paragraphs = details.paragraphs ?? [];
+		const galleries = details.galleries ?? [];
+		const out: ContentItem[] = [];
+		let pi = 0;
+		let gi = 0;
+		const paragraphFirst = (details.arrangement ?? 'paragraph-first') === 'paragraph-first';
+
+		if (paragraphFirst) {
+			while (pi < paragraphs.length && gi < galleries.length) {
+				out.push({ kind: 'paragraph', idx: pi, data: paragraphs[pi++] });
+				out.push({ kind: 'gallery', idx: gi, data: galleries[gi++] });
+			}
+		} else {
+			while (pi < paragraphs.length && gi < galleries.length) {
+				out.push({ kind: 'gallery', idx: gi, data: galleries[gi++] });
+				out.push({ kind: 'paragraph', idx: pi, data: paragraphs[pi++] });
+			}
+		}
+
+		while (pi < paragraphs.length) {
+			out.push({ kind: 'paragraph', idx: pi, data: paragraphs[pi++] });
+		}
+		while (gi < galleries.length) {
+			out.push({ kind: 'gallery', idx: gi, data: galleries[gi++] });
+		}
+
+		return out;
+	}
+
 	onMount(() => {});
 </script>
 
@@ -86,6 +123,24 @@
 {#if modalOpen && selectedProjectId}
 	<Modal open={modalOpen} onClose={closeModal}>
 		{@const details = projectDetails[selectedProjectId]}
-		{#if details}{/if}
+		{#if details}
+			{@const content = composeContent(details)}
+			{#each content as item (item.kind === 'paragraph' ? `p-${item.idx}` : `g-${item.idx}`)}
+				{#if item.kind === 'paragraph'}
+					<ParagraphBlock
+						title={item.data.title}
+						text={item.data.text}
+						textJustify={item.data.textJustify}
+					/>
+				{:else}
+					<Gallery
+						rows={item.data.maxRows}
+						cols={item.data.maxCols}
+						projectId={details.id}
+						galleryIndex={item.idx}
+					/>
+				{/if}
+			{/each}
+		{/if}
 	</Modal>
 {/if}

@@ -1,4 +1,5 @@
 export type ProjectDetails = Readonly<{
+	id: string;
 	arrangement?: 'paragraph-first' | 'gallery-first';
 	paragraphs?: Readonly<
 		{
@@ -7,15 +8,16 @@ export type ProjectDetails = Readonly<{
 			textJustify?: string;
 		}[]
 	>;
-	gallery?: Readonly<{
-		rows: number;
-		cols: number;
+	galleries?: Readonly<{
+		maxRows: number;
+		maxCols: number;
 		images: readonly string[];
 	}>[];
 }>;
 
 export const projectDetails: Record<string, ProjectDetails> = {
 	aquasolace: {
+		id: 'aquasolace',
 		arrangement: 'paragraph-first',
 		paragraphs: [
 			{
@@ -24,24 +26,29 @@ export const projectDetails: Record<string, ProjectDetails> = {
 				textJustify: 'right'
 			},
 			{
-				text: 'Following the IMI Showtime Summer 2024 presentation, I continued as a freelance developer to complete and deliver the production-ready solution to the organization.',
+				text: 'Following the IMI Showtime Summer 2024 presentation, I continued as a solo freelance developer to complete and deliver the final game to the organization.',
 				textJustify: 'left'
 			}
 		],
-		gallery: [
+		galleries: [
 			{
-				rows: 2,
-				cols: 2,
+				maxRows: 1,
+				maxCols: 1,
+				images: ['./src/lib/assets/projects/aquasolace/aquasolace-game-sc-01.avif?enhanced']
+			},
+			{
+				maxRows: 2,
+				maxCols: 2,
 				images: [
-					'/banners/aquasolace.jpeg',
-					'/banners/pointclouds.jpeg',
-					'/banners/pointclouds.jpeg',
-					'/banners/pointclouds.jpeg'
+					'./src/lib/assets/projects/aquasolace/aquasolace-game-sc-02.avif?enhanced',
+					'./src/lib/assets/projects/aquasolace/aquasolace-outdoor-group-p.avif?enhanced',
+					'./src/lib/assets/projects/aquasolace/aquasolace-showtime-p.avif?enhanced'
 				]
 			}
 		]
 	},
 	'nerf-viewer': {
+		id: 'ue-plugin-nerf',
 		arrangement: 'gallery-first',
 		paragraphs: [
 			{
@@ -50,10 +57,10 @@ export const projectDetails: Record<string, ProjectDetails> = {
 				textJustify: 'right'
 			}
 		],
-		gallery: [
+		galleries: [
 			{
-				rows: 1,
-				cols: 3,
+				maxRows: 1,
+				maxCols: 3,
 				images: [
 					'/banners/pointclouds.jpeg',
 					'/banners/pointclouds.jpeg',
@@ -63,6 +70,7 @@ export const projectDetails: Record<string, ProjectDetails> = {
 		]
 	},
 	'works-on-llms': {
+		id: 'llm-works',
 		arrangement: 'paragraph-first',
 		paragraphs: [
 			{
@@ -70,10 +78,10 @@ export const projectDetails: Record<string, ProjectDetails> = {
 				text: 'Placeholder paragraph for Works on LLMs.'
 			}
 		],
-		gallery: [
+		galleries: [
 			{
-				rows: 1,
-				cols: 2,
+				maxRows: 1,
+				maxCols: 2,
 				images: ['/banners/pointclouds.jpeg', '/banners/pointclouds.jpeg']
 			}
 		]

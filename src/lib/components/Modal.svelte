@@ -42,8 +42,8 @@
 	class="h-lvh w-[82.5lvw] place-self-center rounded-[0.5lvw] border-2 bg-white/10 backdrop-blur-xl"
 >
 	<div class="flex flex-col">
-		<button type="button" onclick={onClose} class="self-end pt-[0.5lvh] pr-[0.6lvh]"
-			><X size="2lvw" /></button
+		<button type="button" onclick={onClose} class="self-end pt-[1lvh] pr-[1lvh]"
+			><X size="5lvw" /></button
 		>
 		{@render children?.()}
 	</div>
