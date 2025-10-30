@@ -15,6 +15,13 @@
 	import { fade } from 'svelte/transition';
 	import { ChevronsDownUp } from '@lucide/svelte';
 	import { circOut } from 'svelte/easing';
+	import {
+		registerBanner,
+		unregisterBanner,
+		notifyExpanded,
+		notifyCollapsed,
+		requestCollapseAndWait
+	} from '$lib/stores/bannerCoordinator';
 
 	type Paragraph = NonNullable<ProjectDetails['paragraphs']>[number];
 	type GalleryGroup = NonNullable<ProjectDetails['galleries']>[number];
@@ -89,6 +96,26 @@
 		});
 	}
 
+	const TRANSITION_MS = 500;
+	function waitForTransitionEnd(el: HTMLElement, maxMs = TRANSITION_MS + 120): Promise<void> {
+		return new Promise((resolve) => {
+			let resolved = false;
+			const done = () => {
+				if (resolved) return;
+				resolved = true;
+				el.removeEventListener('transitionend', onEnd);
+				resolve();
+			};
+			const onEnd = () => {
+				console.log('transitionend did fire');
+				done();
+			};
+			el.addEventListener('transitionend', onEnd, { once: true });
+			console.log('transitionend did not fire');
+			setTimeout(done, maxMs);
+		});
+	}
+
 	let clickedWhileLoading: boolean = $state(false);
 	let clicked: boolean = $state(false);
 
@@ -97,6 +124,7 @@
 	const shouldApplyLoadingStyle = $derived(
 		Boolean($projectImagesStatus[imagesProjectId]?.loading) && clickedWhileLoading
 	);
+	const shouldDisablePointerEvent = $derived(clickedWhileLoading && !isCentered);
 
 	const hoverCls = $derived(expanded ? '' : 'hover:project-banner-hover');
 
@@ -104,7 +132,7 @@
 		getEnhancedImageByPathOrName(project.image) as string | string
 	);
 
-	function isCentered(thresholdPx = 100) {
+	function isCentered(thresholdPx = 10) {
 		if (!buttonElement) return false;
 		const rect = buttonElement.getBoundingClientRect();
 		const elementCenterY = rect.top + rect.height / 2;
@@ -125,18 +153,24 @@
 			}
 			scrollContainer.scrollTop = 0;
 		}
+
 		clicked = false;
 		clickedWhileLoading = false;
+
 		dispatch('collapsed', { id: project.id });
+
+		if (buttonElement) {
+			await waitForTransitionEnd(buttonElement);
+		} else {
+			await new Promise((r) => setTimeout(r, TRANSITION_MS + 120));
+		}
+		notifyCollapsed(project.id);
 	}
 
-	// Expand banner once images are loaded; keep margins like hover utility
 	//TODO: since we use the scrollend event, prevent if user is using safari
 	async function onClick() {
-		const centered = isCentered();
-		if (!centered) {
-			buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-		}
+		await requestCollapseAndWait(project.id);
+		notifyExpanded(project.id); // TODO call sooner right after first await
 
 		if (!imagesLoadedForProject) {
 			clickedWhileLoading = true;
@@ -145,6 +179,19 @@
 		clicked = true;
 		dispatch('expanded', { id: project.id });
 	}
+
+	$effect(() => {
+		const centered = isCentered();
+		if (clickedWhileLoading && !centered) {
+			buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			return;
+		}
+
+		if (clicked && !centered) {
+			buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			return;
+		}
+	});
 
 	function onKeydownGlobal(e: KeyboardEvent) {
 		if (e.key === 'Escape' && expanded) {
@@ -175,11 +222,13 @@
 	}
 
 	onMount(() => {
+		registerBanner(project.id, collapse);
 		document.addEventListener('keydown', onKeydownGlobal);
 		document.addEventListener('pointerdown', onPointerDownGlobal, true);
 	});
 
 	onDestroy(() => {
+		unregisterBanner(project.id);
 		if (typeof document !== 'undefined') {
 			document.removeEventListener('keydown', onKeydownGlobal);
 			document.removeEventListener('pointerdown', onPointerDownGlobal, true);
@@ -192,20 +241,22 @@
 	);
 </script>
 
+<!-- TODO set smaller border radius when expanded -->
 <div
 	{@attach toButtonElement}
 	role="button"
 	tabindex="0"
 	aria-expanded={expanded}
+	onmouseenter={onMouseEnter}
+	onclick={onClick}
+	onkeydown={onKeydownWrapper}
 	class="group relative isolate mx-[2lvw] min-h-[60lvh] basis-[60lvh] snap-center snap-always overflow-hidden rounded-[2lvw] text-left transition-all duration-500 ease-in-out {shouldApplyLoadingStyle
 		? 'animate-size-pulse'
 		: ''} {expanded
 		? 'z-20 min-h-[80lvh] basis-[80lvh] cursor-default'
 		: 'cursor-pointer'} {hoverCls}"
 	class:cursor-progress={shouldApplyLoadingStyle}
-	onmouseenter={onMouseEnter}
-	onclick={onClick}
-	onkeydown={onKeydownWrapper}
+	class:pointer-events-none={shouldDisablePointerEvent}
 	style="content-visibility:auto; contain-intrinsic-size: {expanded
 		? '80lvh 100%'
 		: '60lvh 100%'}; margin: {expanded ? '0.5lvw' : ''};"
@@ -265,7 +316,7 @@
 		{#if expanded && imagesLoadedForProject && detailsForBanner}
 			{@const content = contentItems}
 			<div
-				class="relative z-10 mt-[0lvh] flex flex-col gap-4 pt-[0lvh]"
+				class="relative z-10 mt-0 flex flex-col gap-4 pt-0"
 				in:fade={{ duration: 1000, easing: circOut }}
 				out:fade={{ duration: 200 }}
 			>
