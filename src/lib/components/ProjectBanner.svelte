@@ -11,6 +11,7 @@
 		getEnhancedImageByPathOrName,
 		getGalleryImages
 	} from '$lib/util/projectImages';
+	import { animateScrollToTop, getMainScroller, scrollElementToCenter } from '$lib/util/scroll';
 	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { ChevronsDownUp } from '@lucide/svelte';
@@ -78,24 +79,6 @@
 		scrollContainer = node;
 	};
 
-	function animateScrollToTop(el: HTMLElement, duration = 300): Promise<void> {
-		const start = el.scrollTop;
-		if (start <= 0) return Promise.resolve();
-		const startTime = performance.now();
-		const easeOutCirc = (t: number) => t * t;
-		return new Promise((resolve) => {
-			function step(now: number) {
-				const elapsed = now - startTime;
-				const progress = Math.min(elapsed / duration, 1);
-				const eased = easeOutCirc(progress);
-				el.scrollTop = start * (1 - eased);
-				if (progress < 1) requestAnimationFrame(step);
-				else resolve();
-			}
-			requestAnimationFrame(step);
-		});
-	}
-
 	const TRANSITION_MS = 500;
 	function waitForTransitionEnd(el: HTMLElement, maxMs = TRANSITION_MS + 120): Promise<void> {
 		return new Promise((resolve) => {
@@ -114,105 +97,6 @@
 			console.log('transitionend did not fire');
 			setTimeout(done, maxMs);
 		});
-	}
-
-	function getScrollParent(el: HTMLElement | null): HTMLElement | Window {
-		let node: HTMLElement | null = el?.parentElement ?? null;
-		while (node) {
-			const style = getComputedStyle(node);
-			const overflowY = style.overflowY;
-			const canScroll =
-				(overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight;
-			if (canScroll) return node;
-			node = node.parentElement;
-		}
-		return window;
-	}
-
-	// Easing and scroll helpers for precise, promise-based scrolling
-	function easeInOutCubic(t: number) {
-		return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-	}
-
-	function scrollToY(
-		scroller: HTMLElement,
-		to: number,
-		duration = 500,
-		easing = easeInOutCubic
-	): Promise<void> {
-		const start = scroller.scrollTop;
-		const max = scroller.scrollHeight - scroller.clientHeight;
-		const target = Math.max(0, Math.min(max, to));
-		const change = target - start;
-		if (duration <= 0 || Math.abs(change) < 1) {
-			scroller.scrollTop = target;
-			return Promise.resolve();
-		}
-		const startTime = performance.now();
-		return new Promise((resolve) => {
-			function step(now: number) {
-				const p = Math.min(1, (now - startTime) / duration);
-				const eased = easing(p);
-				scroller.scrollTop = start + change * eased;
-				if (p < 1) requestAnimationFrame(step);
-				else resolve();
-			}
-			requestAnimationFrame(step);
-		});
-	}
-
-	function scrollWindowToY(to: number, duration = 500, easing = easeInOutCubic): Promise<void> {
-		const se = (document.scrollingElement || document.documentElement) as HTMLElement;
-		const start = window.scrollY;
-		const max = se.scrollHeight - window.innerHeight;
-		const target = Math.max(0, Math.min(max, to));
-		const change = target - start;
-		if (duration <= 0 || Math.abs(change) < 1) {
-			window.scrollTo({ top: target, left: window.scrollX });
-			return Promise.resolve();
-		}
-		const startTime = performance.now();
-		return new Promise((resolve) => {
-			function step(now: number) {
-				const p = Math.min(1, (now - startTime) / duration);
-				const eased = easing(p);
-				window.scrollTo({ top: start + change * eased, left: window.scrollX });
-				if (p < 1) requestAnimationFrame(step);
-				else resolve();
-			}
-			requestAnimationFrame(step);
-		});
-	}
-
-	function computeCenterTargetY(scroller: HTMLElement, el: HTMLElement) {
-		const sRect = scroller.getBoundingClientRect();
-		const eRect = el.getBoundingClientRect();
-		const delta = eRect.top - sRect.top + eRect.height / 2 - scroller.clientHeight / 2;
-		return scroller.scrollTop + delta;
-	}
-
-	async function withScrollSnapDisabled(scrollerElem: HTMLElement, fn: () => Promise<void>) {
-		const prev = scrollerElem.style.scrollSnapType;
-		scrollerElem.style.scrollSnapType = 'none';
-		try {
-			await fn();
-		} finally {
-			scrollerElem.style.scrollSnapType = prev;
-		}
-	}
-
-	async function scrollElementToCenter(el: HTMLElement, duration = 500): Promise<void> {
-		const scroller = getScrollParent(el);
-		if (scroller instanceof Window) {
-			const se = (document.scrollingElement || document.documentElement) as HTMLElement;
-			const eRect = el.getBoundingClientRect();
-			const delta = eRect.top + eRect.height / 2 - window.innerHeight / 2;
-			const target = window.scrollY + delta;
-			await withScrollSnapDisabled(se, () => scrollWindowToY(target, duration));
-			return;
-		}
-		const target = computeCenterTargetY(scroller, el);
-		await withScrollSnapDisabled(scroller, () => scrollToY(scroller, target, duration));
 	}
 
 	let clickedWhileLoading: boolean = $state(false);
@@ -247,7 +131,8 @@
 	async function collapse() {
 		if (scrollContainer) {
 			try {
-				await animateScrollToTop(scrollContainer, 200);
+				await animateScrollToTop(scrollContainer, 600);
+				setTimeout(() => {}, 300);
 			} catch {
 				/* empty */
 			}
@@ -279,13 +164,18 @@
 			imagesPromise = ensureProjectImagesLoaded(imagesProjectId);
 		}
 
-		// Smooth custom scroll to center for deterministic timing
 		if (!isCentered()) {
-			isScrolling = true;
-			try {
-				await scrollElementToCenter(buttonElement, 500);
-			} finally {
-				isScrolling = false;
+			const scroller = getMainScroller();
+			if (scroller) {
+				isScrolling = true;
+				try {
+					await scrollElementToCenter(scroller, buttonElement, 750);
+				} finally {
+					isScrolling = false;
+				}
+			} else {
+				// Fallback but not supported by Safari..
+				buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 			}
 		}
 

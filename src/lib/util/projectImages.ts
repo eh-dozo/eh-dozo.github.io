@@ -1,6 +1,5 @@
 import { writable } from 'svelte/store';
 
-// Eager-import enhanced images anywhere under src/lib/assets/banners to resolve banner images synchronously for SSR
 const allBannerImageImports = import.meta.glob(
 	'/src/lib/assets/banners/**/*.{avif,gif,heif,jpeg,jpg,png,tiff,webp,svg}',
 	{
@@ -10,7 +9,6 @@ const allBannerImageImports = import.meta.glob(
 	}
 );
 
-// All project image imports (lazy-load)
 const allProjectImageImports = import.meta.glob(
 	'/src/lib/assets/projects/**/*.{avif,gif,heif,jpeg,jpg,png,tiff,webp,svg}',
 	{
@@ -19,7 +17,6 @@ const allProjectImageImports = import.meta.glob(
 	}
 );
 
-// Build an index by basename (e.g. "aquasolace.jpeg" => enhanced meta)
 const bannerImageByBasename = new Map<string, string>();
 for (const [path, mod] of Object.entries(allBannerImageImports)) {
 	const base = path.split('/').pop();
@@ -42,7 +39,7 @@ export const projectImagesStatus = writable<Record<string, ProjectImageStatus>>(
 function updateStatus(projectId: string, patch: Partial<ProjectImageStatus>) {
 	projectImagesStatus.update((s) => {
 		const prev = s[projectId] ?? { loading: false, loaded: false };
-		return { ...s, [projectId]: { ...prev, ...patch } }; // shallow the previous state with the new one
+		return { ...s, [projectId]: { ...prev, ...patch } }; // shallow merge the previous state with the new one
 	});
 }
 
@@ -117,9 +114,6 @@ export async function ensureProjectImagesLoaded(projectId: string): Promise<Proj
 	return promise;
 }
 
-// --- Banner helpers (sync for SSR) ---
-
-/** Resolve an enhanced image meta object by a file path or basename. */
 export function getEnhancedImageByPathOrName(input: string | undefined): string | string {
 	if (!input) return '';
 	const base = input.split('/').pop()!;

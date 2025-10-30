@@ -29,6 +29,7 @@
 
 <div
 	{@attach toMainDivElement}
+	data-main-scroll
 	class="no-scrollbar flex h-full min-h-0 w-full snap-y snap-mandatory flex-col gap-[2.5lvh] py-[20lvh] {bannerExpanded
 		? 'overflow-y-hidden'
 		: 'overflow-y-scroll'}"
