@@ -13,7 +13,7 @@
 	} from '$lib/util/projectImages';
 	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import { fade } from 'svelte/transition';
-	// Enhanced image meta comes from Vite's enhanced image plugin; treat as string here
+	import { ChevronsDownUp } from '@lucide/svelte';
 
 	type Paragraph = NonNullable<ProjectDetails['paragraphs']>[number];
 	type GalleryGroup = NonNullable<ProjectDetails['galleries']>[number];
@@ -170,7 +170,7 @@
 	class="group relative isolate mx-[2lvw] min-h-[60lvh] basis-[60lvh] snap-center snap-always overflow-hidden rounded-[2lvw] text-left transition-all duration-500 ease-in-out {shouldApplyLoadingStyle
 		? 'animate-size-pulse'
 		: ''} {expanded
-		? 'z-20 min-h-[80lvh] basis-[80lvh] cursor-default overflow-y-auto'
+		? 'z-20 min-h-[80lvh] basis-[80lvh] cursor-default'
 		: 'cursor-pointer'} {hoverCls}"
 	class:cursor-progress={shouldApplyLoadingStyle}
 	onmouseenter={onMouseEnter}
@@ -189,62 +189,71 @@
 		decoding="async"
 	/>
 
-	<div class="absolute top-[5lvh] right-[4lvw] left-[4lvw]">
-		<h2
-			class="underline-gradient text-[9lvw] leading-[20vh] font-[550] tracking-tight text-white mix-blend-difference group-hover:underline-gradient-active {shouldApplyLoadingStyle
-				? 'animate-opacity-pulse'
-				: ''} {expanded ? 'text-right' : ''}"
-		>
-			{project.title}
-		</h2>
-	</div>
-
-	{#if !expanded}
-		<div class="absolute right-[3lvw] bottom-[4lvh] text-right">
-			<span
-				class="underline-gradient text-[2lvw] font-light text-white mix-blend-difference group-hover:underline-gradient-active {shouldApplyLoadingStyle
-					? 'animate-opacity-pulse'
-					: ''}"
-				transition:fade={{ duration: 200 }}>{project.dateSpan}</span
+	<div class="absolute inset-0 {expanded ? 'h-full overflow-y-auto overscroll-contain' : ''}">
+		{#if expanded}
+			<div
+				role="button"
+				tabindex="0"
+				aria-label="Collapse"
+				class="sticky top-0 z-20 w-[2lvw] rotate-45 place-self-end rounded-full pt-[3lvh] pr-[3lvw]"
+				onclick={collapse}
+				onkeydown={onKeydownCollapse}
 			>
-		</div>
-	{/if}
+				<ChevronsDownUp size={64} />
+			</div>
+		{/if}
 
-	{#if expanded}
+		<!-- TODO make separate animation / @utility that does a correct up and down for the h2 -->
 		<div
-			role="button"
-			tabindex="0"
-			aria-label="Collapse"
-			class="absolute top-[2lvh] left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-white backdrop-blur-sm"
-			onclick={collapse}
-			onkeydown={onKeydownCollapse}
+			class="relative right-[4lvw] left-[4lvw] transform-gpu pt-[5lvh] pb-[3lvh] text-balance transition-transform duration-500 ease-in-out {expanded
+				? '-translate-y-[5lvh]'
+				: ''}"
 		>
-			⯆
+			<h2
+				class="underline-gradient text-[9lvw] leading-[20vh] font-[550] tracking-tight text-white mix-blend-difference group-hover:underline-gradient-active {shouldApplyLoadingStyle
+					? 'animate-opacity-pulse'
+					: ''} {expanded ? 'text-right' : ''}"
+			>
+				{project.title}
+			</h2>
 		</div>
-	{/if}
 
-	{#if expanded && imagesLoadedForProject && detailsForBanner}
-		{@const content = contentItems}
-		<div
-			class="relative z-10 mt-[22lvh] flex flex-col gap-4 pt-[4lvh]"
-			in:fade={{ duration: 500 }}
-			out:fade={{ duration: 200 }}
-		>
-			{#each content as item (item.kind === 'paragraph' ? `p-${item.idx}` : `g-${item.idx}`)}
-				{#if item.kind === 'paragraph'}
-					<ParagraphBlock
-						title={item.data.title}
-						text={item.data.text}
-						textJustify={item.data.textJustify}
-					/>
-				{:else}
-					<Gallery
-						rows={item.data.maxRows}
-						cols={item.data.maxCols}
-						images={getGalleryImages(detailsForBanner.id, item.idx) ?? []}
-					/>
-				{/if}
-			{/each}
-		</div>
-	{/if}
+		{#if !expanded}
+			<div class="absolute right-[3lvw] bottom-[4lvh] text-right">
+				<span
+					class="underline-gradient text-[2lvw] font-light text-white mix-blend-difference group-hover:underline-gradient-active {shouldApplyLoadingStyle
+						? 'animate-opacity-pulse'
+						: ''}"
+					transition:fade={{ duration: 200 }}>{project.dateSpan}</span
+				>
+			</div>
+		{/if}
+
+		{#if expanded && imagesLoadedForProject && detailsForBanner}
+			{@const content = contentItems}
+			<div
+				class="relative z-10 mt-[0lvh] flex flex-col gap-4 pt-[0lvh]"
+				in:fade={{ duration: 500 }}
+				out:fade={{ duration: 200 }}
+			>
+				<div>
+					{#each content as item (item.kind === 'paragraph' ? `p-${item.idx}` : `g-${item.idx}`)}
+						{#if item.kind === 'paragraph'}
+							<ParagraphBlock
+								title={item.data.title}
+								text={item.data.text}
+								textJustify={item.data.textJustify}
+							/>
+						{:else}
+							<Gallery
+								rows={item.data.maxRows}
+								cols={item.data.maxCols}
+								images={getGalleryImages(detailsForBanner.id, item.idx) ?? []}
+							/>
+						{/if}
+					{/each}
+				</div>
+			</div>
+		{/if}
+	</div>
 </div>
