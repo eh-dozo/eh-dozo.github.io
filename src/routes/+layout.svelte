@@ -11,11 +11,10 @@
 </svelte:head>
 
 <div class="relative">
+	<!-- GPU-accelerated parallax background (transform instead of background-position) -->
 	<div
 		aria-hidden="true"
-		class="
-		pointer-events-none fixed inset-0 -z-10
-		bg-(image:--bg) bg-size-(--html-bg-size)"
+		class="pointer-events-none fixed inset-0 -z-10 bg-(image:--bg) bg-size-(--html-bg-size)"
 		style="background-position: center calc(var(--bg-y));"
 	></div>
 

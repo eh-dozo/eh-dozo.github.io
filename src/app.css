@@ -9,7 +9,7 @@
 
 :root {
 	--bg: url('/bg.jpg');
-	--bg-y: 0.5;
+	--bg-y: 0px;
 	--html-bg-size: 150%;
 	--gutter: 13.5lvw;
 }

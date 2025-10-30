@@ -9,6 +9,23 @@ const allProjectImageImports = import.meta.glob(
 	}
 );
 
+// Eager-import enhanced images anywhere under src/lib/assets/banners to resolve banner images synchronously for SSR
+const allBannerImageImports = import.meta.glob(
+	'/src/lib/assets/banners/**/*.{avif,gif,heif,jpeg,jpg,png,tiff,webp,svg}',
+	{
+		eager: true,
+		import: 'default',
+		query: { enhanced: true }
+	}
+);
+
+// Build an index by basename (e.g. "aquasolace.jpeg" => enhanced meta)
+const bannerImageByBasename = new Map<string, string>();
+for (const [path, mod] of Object.entries(allBannerImageImports)) {
+	const base = path.split('/').pop();
+	if (base) bannerImageByBasename.set(base, mod as string);
+}
+
 export type ProjectGalleryGroups = Record<number, string[]>;
 
 export type ProjectImageStatus = {
@@ -98,4 +115,13 @@ export async function ensureProjectImagesLoaded(projectId: string): Promise<Proj
 
 	inFlight.set(projectId, promise);
 	return promise;
+}
+
+// --- Banner helpers (sync for SSR) ---
+
+/** Resolve an enhanced image meta object by a file path or basename. */
+export function getEnhancedImageByPathOrName(input: string | undefined): unknown | undefined {
+	if (!input) return undefined;
+	const base = input.split('/').pop()!;
+	return bannerImageByBasename.get(base);
 }

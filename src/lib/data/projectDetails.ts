@@ -39,15 +39,15 @@ export const projectDetails: Record<string, ProjectDetails> = {
 			{
 				maxRows: 1,
 				maxCols: 1,
-				images: ['./src/lib/assets/projects/aquasolace/aquasolace-game-sc-01.avif?enhanced']
+				images: ['./src/lib/assets/projects/aquasolace/aquasolace-game-sc-01.avif']
 			},
 			{
 				maxRows: 2,
 				maxCols: 2,
 				images: [
-					'./src/lib/assets/projects/aquasolace/aquasolace-game-sc-02.avif?enhanced',
-					'./src/lib/assets/projects/aquasolace/aquasolace-outdoor-group-p.avif?enhanced',
-					'./src/lib/assets/projects/aquasolace/aquasolace-showtime-p.avif?enhanced'
+					'./src/lib/assets/projects/aquasolace/aquasolace-game-sc-02.avif',
+					'./src/lib/assets/projects/aquasolace/aquasolace-outdoor-group-p.avif',
+					'./src/lib/assets/projects/aquasolace/aquasolace-showtime-p.avif'
 				]
 			}
 		]
