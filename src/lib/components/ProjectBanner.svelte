@@ -14,6 +14,7 @@
 	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { ChevronsDownUp } from '@lucide/svelte';
+	import { circOut } from 'svelte/easing';
 
 	type Paragraph = NonNullable<ProjectDetails['paragraphs']>[number];
 	type GalleryGroup = NonNullable<ProjectDetails['galleries']>[number];
@@ -183,31 +184,30 @@
 	<enhanced:img
 		src={bannerMeta}
 		alt={project.title}
-		class="absolute inset-0 -z-10 size-full object-cover"
+		class="absolute inset-0 -z-10 size-full object-cover transition-[filter] duration-200 ease-linear {expanded
+			? 'blur-3xl'
+			: 'blur-0'}"
 		loading={priority ? 'eager' : 'lazy'}
 		fetchpriority={priority ? 'high' : 'auto'}
 		decoding="async"
 	/>
 
-	<div class="absolute inset-0 {expanded ? 'h-full overflow-y-auto overscroll-contain' : ''}">
-		{#if expanded}
-			<div
-				role="button"
-				tabindex="0"
-				aria-label="Collapse"
-				class="sticky top-0 z-20 w-[2lvw] rotate-45 place-self-end rounded-full pt-[3lvh] pr-[3lvw]"
-				onclick={collapse}
-				onkeydown={onKeydownCollapse}
-			>
-				<ChevronsDownUp size={64} />
-			</div>
-		{/if}
-
-		<!-- TODO make separate animation / @utility that does a correct up and down for the h2 -->
+	{#if expanded}
 		<div
-			class="relative right-[4lvw] left-[4lvw] transform-gpu pt-[5lvh] pb-[3lvh] text-balance transition-transform duration-500 ease-in-out {expanded
-				? '-translate-y-[5lvh]'
-				: ''}"
+			role="button"
+			tabindex="0"
+			aria-label="Collapse"
+			class="sticky top-0 z-20 w-[2lvw] rotate-45 place-self-end rounded-full pt-[3lvh] pr-[3lvw]"
+			onclick={collapse}
+			onkeydown={onKeydownCollapse}
+		>
+			<ChevronsDownUp size={64} />
+		</div>
+	{/if}
+
+	<div class="absolute inset-0 {expanded ? 'h-full overflow-y-auto overscroll-contain' : ''}">
+		<div
+			class="relative right-[4lvw] left-[4lvw] pt-[5lvh] pb-[3lvh] text-balance transition-transform duration-500 ease-in-out"
 		>
 			<h2
 				class="underline-gradient text-[9lvw] leading-[20vh] font-[550] tracking-tight text-white mix-blend-difference group-hover:underline-gradient-active {shouldApplyLoadingStyle
@@ -224,7 +224,8 @@
 					class="underline-gradient text-[2lvw] font-light text-white mix-blend-difference group-hover:underline-gradient-active {shouldApplyLoadingStyle
 						? 'animate-opacity-pulse'
 						: ''}"
-					transition:fade={{ duration: 200 }}>{project.dateSpan}</span
+					in:fade={{ duration: 350 }}
+					out:fade={{ duration: 100 }}>{project.dateSpan}</span
 				>
 			</div>
 		{/if}
@@ -233,7 +234,7 @@
 			{@const content = contentItems}
 			<div
 				class="relative z-10 mt-[0lvh] flex flex-col gap-4 pt-[0lvh]"
-				in:fade={{ duration: 500 }}
+				in:fade={{ duration: 1000, easing: circOut }}
 				out:fade={{ duration: 200 }}
 			>
 				<div>
