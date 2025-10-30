@@ -129,103 +129,102 @@
 		return window;
 	}
 
-	function waitForScrollToCenter(
-		el: HTMLElement,
-		thresholdPx = 10,
-		idleMs = 120,
-		timeoutMs = 1500
+	// Easing and scroll helpers for precise, promise-based scrolling
+	function easeInOutCubic(t: number) {
+		return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+	}
+
+	function scrollToY(
+		scroller: HTMLElement,
+		to: number,
+		duration = 500,
+		easing = easeInOutCubic
 	): Promise<void> {
-		const scroller = getScrollParent(el);
-		let lastScroll = performance.now();
-		let raf = 0;
-		let resolved = false;
-
-		const isNowCentered = () => {
-			const rect = el.getBoundingClientRect();
-			const elementCenterY = rect.top + rect.height / 2;
-			const viewportCenterY = window.innerHeight / 2;
-			return Math.abs(viewportCenterY - elementCenterY) <= thresholdPx;
-		};
-
+		const start = scroller.scrollTop;
+		const max = scroller.scrollHeight - scroller.clientHeight;
+		const target = Math.max(0, Math.min(max, to));
+		const change = target - start;
+		if (duration <= 0 || Math.abs(change) < 1) {
+			scroller.scrollTop = target;
+			return Promise.resolve();
+		}
+		const startTime = performance.now();
 		return new Promise((resolve) => {
-			const done = () => {
-				if (resolved) return;
-
-				resolved = true;
-
-				// cleanup
-				if (raf) cancelAnimationFrame(raf);
-				if (scroller instanceof Window) {
-					window.removeEventListener('scroll', onScroll, {
-						capture: true
-					} as AddEventListenerOptions);
-					window.removeEventListener?.('scrollend', onScrollEnd, {
-						capture: true
-					} as AddEventListenerOptions);
-				} else {
-					scroller.removeEventListener('scroll', onScroll, {
-						capture: true
-					} as AddEventListenerOptions);
-					scroller.removeEventListener?.('scrollend', onScrollEnd, {
-						capture: true
-					} as AddEventListenerOptions);
-				}
-
-				resolve();
-			};
-
-			const onScroll = () => {
-				lastScroll = performance.now();
-
-				//queueCheck
-				if (raf) return;
-				raf = requestAnimationFrame(() => {
-					raf = 0;
-					const elapsed = performance.now() - lastScroll;
-					if (elapsed >= idleMs && isNowCentered()) done();
-				});
-			};
-
-			const onScrollEnd = () => {
-				if (isNowCentered()) done();
-			};
-
-			if (scroller instanceof Window) {
-				window.addEventListener('scroll', onScroll, {
-					capture: true,
-					passive: true
-				} as AddEventListenerOptions);
-				window.addEventListener?.('scrollend', onScrollEnd, {
-					capture: true
-				} as AddEventListenerOptions);
-			} else {
-				scroller.addEventListener('scroll', onScroll, {
-					capture: true,
-					passive: true
-				} as AddEventListenerOptions);
-				scroller.addEventListener?.('scrollend', onScrollEnd, {
-					capture: true
-				} as AddEventListenerOptions);
+			function step(now: number) {
+				const p = Math.min(1, (now - startTime) / duration);
+				const eased = easing(p);
+				scroller.scrollTop = start + change * eased;
+				if (p < 1) requestAnimationFrame(step);
+				else resolve();
 			}
-
-			// i.e. if already centered
-			if (isNowCentered()) {
-				setTimeout(() => done(), idleMs);
-			}
-
-			setTimeout(done, timeoutMs);
+			requestAnimationFrame(step);
 		});
+	}
+
+	function scrollWindowToY(to: number, duration = 500, easing = easeInOutCubic): Promise<void> {
+		const se = (document.scrollingElement || document.documentElement) as HTMLElement;
+		const start = window.scrollY;
+		const max = se.scrollHeight - window.innerHeight;
+		const target = Math.max(0, Math.min(max, to));
+		const change = target - start;
+		if (duration <= 0 || Math.abs(change) < 1) {
+			window.scrollTo({ top: target, left: window.scrollX });
+			return Promise.resolve();
+		}
+		const startTime = performance.now();
+		return new Promise((resolve) => {
+			function step(now: number) {
+				const p = Math.min(1, (now - startTime) / duration);
+				const eased = easing(p);
+				window.scrollTo({ top: start + change * eased, left: window.scrollX });
+				if (p < 1) requestAnimationFrame(step);
+				else resolve();
+			}
+			requestAnimationFrame(step);
+		});
+	}
+
+	function computeCenterTargetY(scroller: HTMLElement, el: HTMLElement) {
+		const sRect = scroller.getBoundingClientRect();
+		const eRect = el.getBoundingClientRect();
+		const delta = eRect.top - sRect.top + eRect.height / 2 - scroller.clientHeight / 2;
+		return scroller.scrollTop + delta;
+	}
+
+	async function withScrollSnapDisabled(scrollerElem: HTMLElement, fn: () => Promise<void>) {
+		const prev = scrollerElem.style.scrollSnapType;
+		scrollerElem.style.scrollSnapType = 'none';
+		try {
+			await fn();
+		} finally {
+			scrollerElem.style.scrollSnapType = prev;
+		}
+	}
+
+	async function scrollElementToCenter(el: HTMLElement, duration = 500): Promise<void> {
+		const scroller = getScrollParent(el);
+		if (scroller instanceof Window) {
+			const se = (document.scrollingElement || document.documentElement) as HTMLElement;
+			const eRect = el.getBoundingClientRect();
+			const delta = eRect.top + eRect.height / 2 - window.innerHeight / 2;
+			const target = window.scrollY + delta;
+			await withScrollSnapDisabled(se, () => scrollWindowToY(target, duration));
+			return;
+		}
+		const target = computeCenterTargetY(scroller, el);
+		await withScrollSnapDisabled(scroller, () => scrollToY(scroller, target, duration));
 	}
 
 	let clickedWhileLoading: boolean = $state(false);
 	let clicked: boolean = $state(false);
+	let isScrolling: boolean = $state(false);
 
 	const imagesLoadedForProject = $derived(Boolean($projectImagesStatus[imagesProjectId]?.loaded));
 	const expanded = $derived(clicked && imagesLoadedForProject);
 	const shouldApplyLoadingStyle = $derived(
 		Boolean($projectImagesStatus[imagesProjectId]?.loading) && clickedWhileLoading
 	);
-	const shouldDisablePointerEvent = $derived(false);
+	const shouldDisablePointerEvent = $derived((clickedWhileLoading || isScrolling) && !isCentered());
 
 	const hoverCls = $derived(expanded ? '' : 'hover:project-banner-hover');
 
@@ -280,10 +279,14 @@
 			imagesPromise = ensureProjectImagesLoaded(imagesProjectId);
 		}
 
-		// If not centered, scroll into view and wait for settling
+		// Smooth custom scroll to center for deterministic timing
 		if (!isCentered()) {
-			buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-			await waitForScrollToCenter(buttonElement);
+			isScrolling = true;
+			try {
+				await scrollElementToCenter(buttonElement, 500);
+			} finally {
+				isScrolling = false;
+			}
 		}
 
 		if (imagesPromise) {
