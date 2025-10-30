@@ -116,6 +116,107 @@
 		});
 	}
 
+	function getScrollParent(el: HTMLElement | null): HTMLElement | Window {
+		let node: HTMLElement | null = el?.parentElement ?? null;
+		while (node) {
+			const style = getComputedStyle(node);
+			const overflowY = style.overflowY;
+			const canScroll =
+				(overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight;
+			if (canScroll) return node;
+			node = node.parentElement;
+		}
+		return window;
+	}
+
+	function waitForScrollToCenter(
+		el: HTMLElement,
+		thresholdPx = 10,
+		idleMs = 120,
+		timeoutMs = 1500
+	): Promise<void> {
+		const scroller = getScrollParent(el);
+		let lastScroll = performance.now();
+		let raf = 0;
+		let resolved = false;
+
+		const isNowCentered = () => {
+			const rect = el.getBoundingClientRect();
+			const elementCenterY = rect.top + rect.height / 2;
+			const viewportCenterY = window.innerHeight / 2;
+			return Math.abs(viewportCenterY - elementCenterY) <= thresholdPx;
+		};
+
+		return new Promise((resolve) => {
+			const done = () => {
+				if (resolved) return;
+
+				resolved = true;
+
+				// cleanup
+				if (raf) cancelAnimationFrame(raf);
+				if (scroller instanceof Window) {
+					window.removeEventListener('scroll', onScroll, {
+						capture: true
+					} as AddEventListenerOptions);
+					window.removeEventListener?.('scrollend', onScrollEnd, {
+						capture: true
+					} as AddEventListenerOptions);
+				} else {
+					scroller.removeEventListener('scroll', onScroll, {
+						capture: true
+					} as AddEventListenerOptions);
+					scroller.removeEventListener?.('scrollend', onScrollEnd, {
+						capture: true
+					} as AddEventListenerOptions);
+				}
+
+				resolve();
+			};
+
+			const onScroll = () => {
+				lastScroll = performance.now();
+
+				//queueCheck
+				if (raf) return;
+				raf = requestAnimationFrame(() => {
+					raf = 0;
+					const elapsed = performance.now() - lastScroll;
+					if (elapsed >= idleMs && isNowCentered()) done();
+				});
+			};
+
+			const onScrollEnd = () => {
+				if (isNowCentered()) done();
+			};
+
+			if (scroller instanceof Window) {
+				window.addEventListener('scroll', onScroll, {
+					capture: true,
+					passive: true
+				} as AddEventListenerOptions);
+				window.addEventListener?.('scrollend', onScrollEnd, {
+					capture: true
+				} as AddEventListenerOptions);
+			} else {
+				scroller.addEventListener('scroll', onScroll, {
+					capture: true,
+					passive: true
+				} as AddEventListenerOptions);
+				scroller.addEventListener?.('scrollend', onScrollEnd, {
+					capture: true
+				} as AddEventListenerOptions);
+			}
+
+			// i.e. if already centered
+			if (isNowCentered()) {
+				setTimeout(() => done(), idleMs);
+			}
+
+			setTimeout(done, timeoutMs);
+		});
+	}
+
 	let clickedWhileLoading: boolean = $state(false);
 	let clicked: boolean = $state(false);
 
@@ -124,7 +225,7 @@
 	const shouldApplyLoadingStyle = $derived(
 		Boolean($projectImagesStatus[imagesProjectId]?.loading) && clickedWhileLoading
 	);
-	const shouldDisablePointerEvent = $derived(clickedWhileLoading && !isCentered);
+	const shouldDisablePointerEvent = $derived(false);
 
 	const hoverCls = $derived(expanded ? '' : 'hover:project-banner-hover');
 
@@ -167,31 +268,35 @@
 		notifyCollapsed(project.id);
 	}
 
-	//TODO: since we use the scrollend event, prevent if user is using safari
+	// Expands only after both scroll-to-center and images load have finished
 	async function onClick() {
 		await requestCollapseAndWait(project.id);
-		notifyExpanded(project.id); // TODO call sooner right after first await
+		notifyExpanded(project.id);
 
+		// Start image loading as early as possible
+		let imagesPromise: Promise<unknown> | null = null;
 		if (!imagesLoadedForProject) {
 			clickedWhileLoading = true;
-			await ensureProjectImagesLoaded(imagesProjectId);
+			imagesPromise = ensureProjectImagesLoaded(imagesProjectId);
 		}
+
+		// If not centered, scroll into view and wait for settling
+		if (!isCentered()) {
+			buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			await waitForScrollToCenter(buttonElement);
+		}
+
+		if (imagesPromise) {
+			try {
+				await imagesPromise;
+			} catch {
+				/* empty */
+			}
+		}
+
 		clicked = true;
 		dispatch('expanded', { id: project.id });
 	}
-
-	$effect(() => {
-		const centered = isCentered();
-		if (clickedWhileLoading && !centered) {
-			buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-			return;
-		}
-
-		if (clicked && !centered) {
-			buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-			return;
-		}
-	});
 
 	function onKeydownGlobal(e: KeyboardEvent) {
 		if (e.key === 'Escape' && expanded) {
@@ -250,23 +355,21 @@
 	onmouseenter={onMouseEnter}
 	onclick={onClick}
 	onkeydown={onKeydownWrapper}
-	class="group relative isolate mx-[2lvw] min-h-[60lvh] basis-[60lvh] snap-center snap-always overflow-hidden rounded-[2lvw] text-left transition-all duration-500 ease-in-out {shouldApplyLoadingStyle
-		? 'animate-size-pulse'
-		: ''} {expanded
-		? 'z-20 min-h-[80lvh] basis-[80lvh] cursor-default'
-		: 'cursor-pointer'} {hoverCls}"
+	class="group relative isolate mx-[2lvw] min-h-[60lvh] basis-[60lvh] snap-center snap-always overflow-hidden rounded-[2lvw] text-left transition-all duration-500 ease-in-out
+		{shouldApplyLoadingStyle ? 'animate-size-pulse' : ''} 
+		{shouldDisablePointerEvent ? 'pointer-events-none' : ''}
+		{expanded ? 'z-20 min-h-[80lvh] basis-[80lvh] cursor-default' : 'cursor-pointer'}
+		{hoverCls}"
 	class:cursor-progress={shouldApplyLoadingStyle}
-	class:pointer-events-none={shouldDisablePointerEvent}
-	style="content-visibility:auto; contain-intrinsic-size: {expanded
-		? '80lvh 100%'
-		: '60lvh 100%'}; margin: {expanded ? '0.5lvw' : ''};"
+	style="content-visibility:auto; 
+		contain-intrinsic-size: {expanded ? '80lvh 100%' : '60lvh 100%'}; 
+		margin: {expanded ? '0.5lvw' : ''};"
 >
 	<enhanced:img
 		src={bannerMeta}
 		alt={project.title}
-		class="absolute inset-0 -z-10 size-full object-cover transition-[filter] duration-200 ease-linear {expanded
-			? 'blur-3xl'
-			: 'blur-0'}"
+		class="absolute inset-0 -z-10 size-full object-cover transition-[filter] duration-200 ease-linear
+			{expanded ? 'blur-3xl' : 'blur-0'}"
 		loading={priority ? 'eager' : 'lazy'}
 		fetchpriority={priority ? 'high' : 'auto'}
 		decoding="async"
@@ -287,15 +390,15 @@
 
 	<div
 		{@attach toScrollContainer}
-		class="absolute inset-0 {expanded ? 'h-full overflow-y-auto overscroll-contain' : ''}"
+		class="absolute inset-0
+			{expanded ? 'h-full overflow-y-auto overscroll-contain' : ''}"
 	>
 		<div
 			class="relative right-[4lvw] left-[4lvw] pt-[5lvh] pb-[3lvh] text-balance transition-transform duration-500 ease-in-out"
 		>
 			<h2
-				class="underline-gradient text-[9lvw] leading-[20vh] font-[550] tracking-tight text-white mix-blend-difference group-hover:underline-gradient-active {shouldApplyLoadingStyle
-					? 'animate-opacity-pulse'
-					: ''} {expanded ? 'text-right' : ''}"
+				class="underline-gradient text-[9lvw] leading-[20vh] font-[550] tracking-tight text-white mix-blend-difference group-hover:underline-gradient-active
+					{shouldApplyLoadingStyle ? 'animate-opacity-pulse' : ''}"
 			>
 				{project.title}
 			</h2>
@@ -304,9 +407,8 @@
 		{#if !expanded}
 			<div class="absolute right-[3lvw] bottom-[4lvh] text-right">
 				<span
-					class="underline-gradient text-[2lvw] font-light text-white mix-blend-difference group-hover:underline-gradient-active {shouldApplyLoadingStyle
-						? 'animate-opacity-pulse'
-						: ''}"
+					class="underline-gradient text-[2lvw] font-light text-white mix-blend-difference group-hover:underline-gradient-active
+						{shouldApplyLoadingStyle ? 'animate-opacity-pulse' : ''}"
 					in:fade={{ duration: 350 }}
 					out:fade={{ duration: 100 }}>{project.dateSpan}</span
 				>
