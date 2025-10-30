@@ -32,6 +32,7 @@
 	function handleBackdropClick(e: MouseEvent) {
 		if (e.target === dialogElement) onClose();
 	}
+	// width equal to col and banner is 69lvw
 </script>
 
 <dialog
@@ -39,7 +40,7 @@
 	aria-modal="true"
 	oncancel={handleCancel}
 	onclick={handleBackdropClick}
-	class="h-lvh w-[82.5lvw] place-self-center rounded-[0.5lvw] border-2 bg-white/10 backdrop-blur-xl"
+	class="h-[60lvh] w-[69lvw] place-self-center rounded-[0.5lvw] bg-white/10 backdrop-blur-xl"
 >
 	<div class="flex flex-col">
 		<button type="button" onclick={onClose} class="self-end pt-[1lvh] pr-[1lvh]"

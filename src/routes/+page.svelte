@@ -125,11 +125,11 @@
 		return out;
 	}
 
-	// rAF-throttled scroll handler to avoid layout thrash
+	// rAF-throttled scroll handler
 	let raf = 0;
 	function onScroll() {
 		if (!mainDivElement) return;
-		const y = mainDivElement.scrollTop * -2.5;
+		const y = mainDivElement.scrollTop * -1.5;
 		if (raf) return;
 		raf = requestAnimationFrame(() => {
 			document.documentElement.style.setProperty('--bg-y', `${y}px`);
@@ -138,16 +138,11 @@
 	}
 
 	onMount(() => {});
-
-	/* 	<svelte:head>
-	<!-- Preload the first banner image to improve LCP -->
-	<link rel="preload" as="image" href={projects[0]?.image} fetchpriority="high" />
-</svelte:head> */
 </script>
 
 <div
 	{@attach toMainDivElement}
-	class="no-scrollbar flex h-full min-h-0 w-full snap-y snap-mandatory flex-col gap-[2.5lvh] overflow-y-scroll py-[12.5lvh]"
+	class="no-scrollbar flex h-full min-h-0 w-full snap-y snap-mandatory flex-col gap-[2.5lvh] overflow-y-scroll py-[20lvh]"
 	onscroll={onScroll}
 >
 	{#each projects as p, i (p.id)}

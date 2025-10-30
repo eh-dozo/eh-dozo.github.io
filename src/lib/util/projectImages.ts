@@ -1,19 +1,19 @@
 import { writable } from 'svelte/store';
 
-// All project image imports (lazy-load)
-const allProjectImageImports = import.meta.glob(
-	'/src/lib/assets/projects/**/*.{avif,gif,heif,jpeg,jpg,png,tiff,webp,svg}',
-	{
-		import: 'default',
-		query: { enhanced: true }
-	}
-);
-
 // Eager-import enhanced images anywhere under src/lib/assets/banners to resolve banner images synchronously for SSR
 const allBannerImageImports = import.meta.glob(
 	'/src/lib/assets/banners/**/*.{avif,gif,heif,jpeg,jpg,png,tiff,webp,svg}',
 	{
 		eager: true,
+		import: 'default',
+		query: { enhanced: true }
+	}
+);
+
+// All project image imports (lazy-load)
+const allProjectImageImports = import.meta.glob(
+	'/src/lib/assets/projects/**/*.{avif,gif,heif,jpeg,jpg,png,tiff,webp,svg}',
+	{
 		import: 'default',
 		query: { enhanced: true }
 	}

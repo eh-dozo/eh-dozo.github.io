@@ -26,6 +26,7 @@ export const projectDetails: Record<string, ProjectDetails> = {
 				 * - a line for the type of project -> environmental simulation / puzzle game
 				 * - "" "" "" -> two-semester academic group project in collaboration with NABU (Naturschutzbund Deutschland) Brandenburg
 				 * - "" "" "" -> Contributions: Game Design, Game Code Implementation, 3D Models Animations
+				 * - Remplacer groupe photo par TPose animaux
 				 */
 				text: 'A two-semester academic group project in collaboration with NABU (Naturschutzbund Deutschland) Brandenburg, with the goal to design and develop a environmental simulation / puzzle game.',
 				textJustify: 'right'
