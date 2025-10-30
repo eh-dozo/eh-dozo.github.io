@@ -66,6 +66,29 @@
 		buttonElement = node;
 	};
 
+	let scrollContainer: HTMLDivElement;
+	const toScrollContainer: Attachment<HTMLDivElement> = (node) => {
+		scrollContainer = node;
+	};
+
+	function animateScrollToTop(el: HTMLElement, duration = 300): Promise<void> {
+		const start = el.scrollTop;
+		if (start <= 0) return Promise.resolve();
+		const startTime = performance.now();
+		const easeOutCirc = (t: number) => t * t;
+		return new Promise((resolve) => {
+			function step(now: number) {
+				const elapsed = now - startTime;
+				const progress = Math.min(elapsed / duration, 1);
+				const eased = easeOutCirc(progress);
+				el.scrollTop = start * (1 - eased);
+				if (progress < 1) requestAnimationFrame(step);
+				else resolve();
+			}
+			requestAnimationFrame(step);
+		});
+	}
+
 	let clickedWhileLoading: boolean = $state(false);
 	let clicked: boolean = $state(false);
 
@@ -93,7 +116,15 @@
 		void ensureProjectImagesLoaded(imagesProjectId);
 	}
 
-	function collapse() {
+	async function collapse() {
+		if (scrollContainer) {
+			try {
+				await animateScrollToTop(scrollContainer, 200);
+			} catch {
+				/* empty */
+			}
+			scrollContainer.scrollTop = 0;
+		}
 		clicked = false;
 		clickedWhileLoading = false;
 		dispatch('collapsed', { id: project.id });
@@ -102,7 +133,6 @@
 	// Expand banner once images are loaded; keep margins like hover utility
 	//TODO: since we use the scrollend event, prevent if user is using safari
 	async function onClick() {
-		// If not roughly centered, scroll into center first
 		const centered = isCentered();
 		if (!centered) {
 			buttonElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -124,7 +154,6 @@
 
 	function onKeydownWrapper(e: KeyboardEvent) {
 		if (e.key === 'Enter' || e.key === ' ') {
-			// prevent page scroll on Space
 			e.preventDefault();
 			onClick();
 		}
@@ -205,7 +234,10 @@
 		</div>
 	{/if}
 
-	<div class="absolute inset-0 {expanded ? 'h-full overflow-y-auto overscroll-contain' : ''}">
+	<div
+		{@attach toScrollContainer}
+		class="absolute inset-0 {expanded ? 'h-full overflow-y-auto overscroll-contain' : ''}"
+	>
 		<div
 			class="relative right-[4lvw] left-[4lvw] pt-[5lvh] pb-[3lvh] text-balance transition-transform duration-500 ease-in-out"
 		>
