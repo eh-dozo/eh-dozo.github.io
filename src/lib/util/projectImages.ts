@@ -120,8 +120,8 @@ export async function ensureProjectImagesLoaded(projectId: string): Promise<Proj
 // --- Banner helpers (sync for SSR) ---
 
 /** Resolve an enhanced image meta object by a file path or basename. */
-export function getEnhancedImageByPathOrName(input: string | undefined): unknown | undefined {
-	if (!input) return undefined;
+export function getEnhancedImageByPathOrName(input: string | undefined): string | string {
+	if (!input) return '';
 	const base = input.split('/').pop()!;
-	return bannerImageByBasename.get(base);
+	return bannerImageByBasename.get(base) as string | string;
 }

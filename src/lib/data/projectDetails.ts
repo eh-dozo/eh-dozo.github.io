@@ -21,7 +21,6 @@ export const projectDetails: Record<string, ProjectDetails> = {
 		arrangement: 'paragraph-first',
 		paragraphs: [
 			{
-				title: 'Aquasolace',
 				/** write it more like:
 				 * - a line for the type of project -> environmental simulation / puzzle game
 				 * - "" "" "" -> two-semester academic group project in collaboration with NABU (Naturschutzbund Deutschland) Brandenburg
@@ -58,7 +57,6 @@ export const projectDetails: Record<string, ProjectDetails> = {
 		arrangement: 'gallery-first',
 		paragraphs: [
 			{
-				title: 'UE5 plugin: NerFs-Viewer',
 				text: 'Placeholder paragraph for NerFs-Viewer.',
 				textJustify: 'right'
 			}
@@ -80,7 +78,6 @@ export const projectDetails: Record<string, ProjectDetails> = {
 		arrangement: 'paragraph-first',
 		paragraphs: [
 			{
-				title: 'Works on LLMs',
 				text: 'Placeholder paragraph for Works on LLMs.'
 			}
 		],

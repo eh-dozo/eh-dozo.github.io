@@ -10,7 +10,16 @@ const config = {
 		adapter: adapter({
 			fallback: undefined,
 			strict: true
-		})
+		}),
+		prerender: {
+			handleHttpError: ({ path, referrer, message }) => {
+				if (path === '/not-found' && referrer === '/blog/how-we-built-our-404-page') {
+					return;
+				}
+
+				throw new Error(message);
+			}
+		}
 	}
 };
 
