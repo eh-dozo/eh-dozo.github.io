@@ -63,9 +63,18 @@
 	interface ProjectBannerProps {
 		project: ProjectData;
 		imagesProjectId: string;
+		isNeighbordExpanded: boolean;
 		priority?: boolean;
 	}
-	let { project, imagesProjectId, priority = false }: ProjectBannerProps = $props();
+	let {
+		project,
+		imagesProjectId,
+		isNeighbordExpanded,
+		priority = false
+	}: ProjectBannerProps = $props();
+
+	const FALLBACK_TRANSITION_DURATION_COLLAPSE = 500;
+	//const FALLBACK_TRANSITION_DURATION_ACTIVE = 250;
 
 	const dispatch = createEventDispatcher<{ expanded: { id: string }; collapsed: { id: string } }>();
 
@@ -79,8 +88,10 @@
 		scrollContainer = node;
 	};
 
-	const TRANSITION_MS = 500;
-	function waitForTransitionEnd(el: HTMLElement, maxMs = TRANSITION_MS + 120): Promise<void> {
+	function waitForTransitionEnd(
+		el: HTMLElement,
+		maxMs = FALLBACK_TRANSITION_DURATION_COLLAPSE + 120
+	): Promise<void> {
 		return new Promise((resolve) => {
 			let resolved = false;
 			const done = () => {
@@ -147,7 +158,7 @@
 		if (buttonElement) {
 			await waitForTransitionEnd(buttonElement);
 		} else {
-			await new Promise((r) => setTimeout(r, TRANSITION_MS + 120));
+			await new Promise((r) => setTimeout(r, FALLBACK_TRANSITION_DURATION_COLLAPSE + 120));
 		}
 		notifyCollapsed(project.id);
 	}
@@ -248,10 +259,13 @@
 	onmouseenter={onMouseEnter}
 	onclick={onClick}
 	onkeydown={onKeydownWrapper}
-	class="group relative isolate mx-[2lvw] min-h-[60lvh] basis-[60lvh] snap-center snap-always overflow-hidden rounded-[2lvw] text-left transition-all duration-500 ease-in-out
+	class="group relative isolate mx-[2lvw] min-h-[60lvh] snap-center snap-always overflow-hidden rounded-[1lvw] text-left transition-all duration-500 ease-in-out
+		{isNeighbordExpanded
+		? ''
+		: 'active:ease-[cubic-bezier(0, 0.55, 0.45, 1)] active:mx-[4lvw] active:mt-[2lvh] active:min-h-[57lvh] active:duration-150'}
 		{shouldApplyLoadingStyle ? 'animate-size-pulse' : ''} 
 		{shouldDisablePointerEvent ? 'pointer-events-none' : ''}
-		{expanded ? 'z-20 min-h-[80lvh] basis-[80lvh] cursor-default' : 'cursor-pointer'}
+		{expanded ? 'z-20 min-h-[80lvh] basis-[80lvh] cursor-default rounded-[0.5lvw]' : 'cursor-pointer'}
 		{hoverCls}"
 	class:cursor-progress={shouldApplyLoadingStyle}
 	style="content-visibility:auto; 

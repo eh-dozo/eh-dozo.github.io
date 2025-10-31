@@ -40,6 +40,7 @@
 		<ProjectBanner
 			project={p}
 			imagesProjectId={detailsForBanner?.id ?? p.id}
+			isNeighbordExpanded={bannerExpanded}
 			priority={i === 0}
 			on:expanded={() => (bannerExpanded = true)}
 			on:collapsed={() => (bannerExpanded = false)}
