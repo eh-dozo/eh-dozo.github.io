@@ -3,8 +3,21 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import Header from '$lib/components/Header.svelte';
 	import Signature from '$lib/components/Signature.svelte';
+	import { profileOverlay } from '$lib/stores/profileOverlay';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
+
+	let overlayExpanded = $state(false);
+	let overlayAnimating = $state(false);
+
+	onMount(() => {
+		const unsub = profileOverlay.subscribe((s) => {
+			overlayExpanded = s.expanded;
+			overlayAnimating = s.animating;
+		});
+		return () => unsub();
+	});
 </script>
 
 <svelte:head>
@@ -36,7 +49,11 @@
 		</div>
 
 		<div class="overflow-y-visible">
-			<Header openProfile={() => console.log('open profile (stub)')} />
+			<Header
+				openProfile={() => profileOverlay.toggle()}
+				expanded={overlayExpanded}
+				animating={overlayAnimating}
+			/>
 		</div>
 
 		<Signature />
