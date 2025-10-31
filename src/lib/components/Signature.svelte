@@ -26,16 +26,29 @@
 
 	let isCardInteractive = $derived(overlayExpanded && phase === 'expanded');
 
-	function toggleFlip() {
+	function onCardMouseEnter() {
 		if (!isCardInteractive) return;
-		isFlipped = !isFlipped;
+		isFlipped = true;
 	}
 
-	function onFlipKey(e: KeyboardEvent) {
+	function onCardMouseLeave() {
+		if (!isCardInteractive) return;
+		isFlipped = false;
+	}
+
+	function onFlipKeyDown(e: KeyboardEvent) {
 		if (!isCardInteractive) return;
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
-			toggleFlip();
+			isFlipped = true;
+		}
+	}
+
+	function onFlipKeyUp(e: KeyboardEvent) {
+		if (!isCardInteractive) return;
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			isFlipped = false;
 		}
 	}
 
@@ -260,8 +273,11 @@
 	aria-live="polite"
 	aria-pressed={isCardInteractive ? isFlipped : active}
 	tabindex="0"
-	onclick={isCardInteractive ? toggleFlip : toggle}
-	onkeydown={isCardInteractive ? onFlipKey : onKey}
+	onclick={isCardInteractive ? undefined : toggle}
+	onmouseenter={isCardInteractive ? onCardMouseEnter : undefined}
+	onmouseleave={isCardInteractive ? onCardMouseLeave : undefined}
+	onkeydown={isCardInteractive ? onFlipKeyDown : onKey}
+	onkeyup={isCardInteractive ? onFlipKeyUp : undefined}
 >
 	<div
 		class="card-inner relative transition-transform duration-200"
@@ -290,17 +306,19 @@
 				>
 			</div>
 
-			<div
-				class="col-start-1 row-start-1 flex flex-col-reverse pb-[0.7lvh] pl-[1lvw] align-middle transition-all duration-300 ease-out"
-				style:transform={active && !overlayExpanded && !overlayAnimating
-					? 'translateY(0%)'
-					: 'translateY(-100%)'}
-				style:opacity={active && !overlayExpanded && !overlayAnimating ? 1 : 0}
-			>
-				<span class="pointer-events-none text-xl font-light tracking-wide">
-					Running with:<br />SvelteKit, Vite, TailwindCSS.</span
+			{#if !isCardInteractive}
+				<div
+					class="col-start-1 row-start-1 flex flex-col-reverse pb-[0.7lvh] pl-[1lvw] align-middle transition-all duration-300 ease-out"
+					style:transform={active && !overlayExpanded && !overlayAnimating
+						? 'translateY(0%)'
+						: 'translateY(-100%)'}
+					style:opacity={active && !overlayExpanded && !overlayAnimating ? 1 : 0}
 				>
-			</div>
+					<span class="pointer-events-none text-xl font-light tracking-wide">
+						Running with:<br />SvelteKit, Vite, TailwindCSS.</span
+					>
+				</div>
+			{/if}
 
 			{#if phase === 'expanded' || phase === 'hidingSecondSpan'}
 				<div
