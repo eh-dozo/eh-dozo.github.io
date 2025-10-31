@@ -31,14 +31,20 @@ export interface OverlayState {
 	reducedMotion: boolean;
 }
 
-function wait(ms: number) {
-	return new Promise<void>((r) => setTimeout(r, ms));
-}
-
-function createCompleter() {
-	let resolve!: () => void;
-	const p = new Promise<void>((r) => (resolve = r));
-	return [p, resolve] as const;
+/**
+ * inspired from https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Sequencing_animations
+ */
+export interface AnimationCallbacks {
+	// Signature animations
+	centerSignature?: () => Animation | null;
+	scaleUpSignature?: () => Animation | null;
+	scaleDownSignature?: () => Animation | null;
+	moveBackSignature?: () => Animation | null;
+	// Secondary span fade
+	fadeOutSecondSpan?: () => Animation | null;
+	// Banner fade animations
+	fadeBannersOut?: () => Animation[] | null;
+	fadeBannersIn?: () => Animation[] | null;
 }
 
 function createProfileOverlay() {
@@ -52,12 +58,7 @@ function createProfileOverlay() {
 		reducedMotion: false
 	});
 
-	// Imperative phase completion resolvers signaled by Signature.svelte
-	let centerDoneResolve: (() => void) | null = null;
-	let scaleUpDoneResolve: (() => void) | null = null;
-	let secondSpanHiddenResolve: (() => void) | null = null;
-	let scaleDownDoneResolve: (() => void) | null = null;
-	let moveBackDoneResolve: (() => void) | null = null;
+	const callbacks: AnimationCallbacks = {};
 
 	function setBannerCount(count: number) {
 		update((s) => ({ ...s, bannerCount: count }));
@@ -65,6 +66,10 @@ function createProfileOverlay() {
 
 	function setReducedMotion(value: boolean) {
 		update((s) => ({ ...s, reducedMotion: value }));
+	}
+
+	function registerCallbacks(cbs: Partial<AnimationCallbacks>) {
+		Object.assign(callbacks, cbs);
 	}
 
 	async function toggle() {
@@ -79,13 +84,13 @@ function createProfileOverlay() {
 		}
 	}
 
+	// Toggle-IN animation
 	async function runIn() {
 		let current: OverlayState;
 		subscribe((s) => (current = s))();
-		// Guard re-entry
+
 		if (current!.animating) return;
 
-		// Start
 		update((s) => ({ ...s, animating: true, direction: 'in', phase: 'collapsingBanner' }));
 		try {
 			await requestCollapseAndWait();
@@ -93,34 +98,29 @@ function createProfileOverlay() {
 			/* empty */
 		}
 
-		// Fade out banners with stagger
 		update((s) => ({ ...s, phase: 'fadingBannersOut' }));
-		const { bannerCount, config, reducedMotion } = current!;
-		if (!reducedMotion) {
-			const total = Math.max(
-				0,
-				(bannerCount - 1) * config.staggerMs + config.fadeMs + config.bufferMs
-			);
-			await wait(total);
+		if (!current!.reducedMotion && callbacks.fadeBannersOut) {
+			const animations = callbacks.fadeBannersOut();
+			if (animations && animations.length > 0) {
+				const lastAnimation = animations[animations.length - 1];
+				if (lastAnimation) {
+					await lastAnimation.finished;
+				}
+			}
 		}
 
-		// Center Signature — wait for signal from component
 		update((s) => ({ ...s, phase: 'centeringSignature' }));
-		if (!reducedMotion) {
-			const [p, r] = createCompleter();
-			centerDoneResolve = r;
-			await p;
+		if (!current!.reducedMotion && callbacks.centerSignature) {
+			const anim = callbacks.centerSignature();
+			if (anim) await anim.finished;
 		}
 
-		// Scale Signature — wait for signal
 		update((s) => ({ ...s, phase: 'scalingSignature' }));
-		if (!reducedMotion) {
-			const [p, r] = createCompleter();
-			scaleUpDoneResolve = r;
-			await p;
+		if (!current!.reducedMotion && callbacks.scaleUpSignature) {
+			const anim = callbacks.scaleUpSignature();
+			if (anim) await anim.finished;
 		}
 
-		// Expanded idle state
 		update((s) => ({
 			...s,
 			expanded: true,
@@ -130,69 +130,44 @@ function createProfileOverlay() {
 		}));
 	}
 
+	// Toggle-OUT animation
 	async function runOut() {
 		let current: OverlayState;
 		subscribe((s) => (current = s))();
 		if (current!.animating) return;
 
 		update((s) => ({ ...s, animating: true, direction: 'out', phase: 'hidingSecondSpan' }));
-		if (!current!.reducedMotion) {
-			const [p, r] = createCompleter();
-			secondSpanHiddenResolve = r;
-			await p;
+		if (!current!.reducedMotion && callbacks.fadeOutSecondSpan) {
+			const anim = callbacks.fadeOutSecondSpan();
+			if (anim) await anim.finished;
 		}
 
 		update((s) => ({ ...s, phase: 'scalingDown' }));
-		if (!current!.reducedMotion) {
-			const [p, r] = createCompleter();
-			scaleDownDoneResolve = r;
-			await p;
+		if (!current!.reducedMotion && callbacks.scaleDownSignature) {
+			const anim = callbacks.scaleDownSignature();
+			if (anim) await anim.finished;
 		}
 
 		update((s) => ({ ...s, phase: 'movingBack' }));
-		if (!current!.reducedMotion) {
-			const [p, r] = createCompleter();
-			moveBackDoneResolve = r;
-			await p;
+		if (!current!.reducedMotion && callbacks.moveBackSignature) {
+			const anim = callbacks.moveBackSignature();
+			if (anim) await anim.finished;
 		}
 
-		// Fade banners back in
 		update((s) => ({ ...s, phase: 'fadingBannersIn' }));
-		const { bannerCount, config, reducedMotion } = current!;
-		if (!reducedMotion) {
-			const total = Math.max(
-				0,
-				(bannerCount - 1) * config.staggerMs + config.fadeMs + config.bufferMs
-			);
-			await wait(total);
+		if (!current!.reducedMotion && callbacks.fadeBannersIn) {
+			const animations = callbacks.fadeBannersIn();
+			if (animations && animations.length > 0) {
+				const lastAnimation = animations[animations.length - 1];
+				if (lastAnimation) {
+					await lastAnimation.finished;
+				}
+			}
 		}
 
 		update((s) => ({ ...s, expanded: false, phase: 'idle', direction: 'none', animating: false }));
 	}
 
-	// Signals from Signature
-	function centerDone() {
-		centerDoneResolve?.();
-		centerDoneResolve = null;
-	}
-	function scaleUpDone() {
-		scaleUpDoneResolve?.();
-		scaleUpDoneResolve = null;
-	}
-	function secondSpanHiddenDone() {
-		secondSpanHiddenResolve?.();
-		secondSpanHiddenResolve = null;
-	}
-	function scaleDownDone() {
-		scaleDownDoneResolve?.();
-		scaleDownDoneResolve = null;
-	}
-	function moveBackDone() {
-		moveBackDoneResolve?.();
-		moveBackDoneResolve = null;
-	}
-
-	// Helper to read current value synchronously for components
 	function get(): OverlayState {
 		let v!: OverlayState;
 		subscribe((s) => (v = s))();
@@ -203,12 +178,8 @@ function createProfileOverlay() {
 		subscribe,
 		setBannerCount,
 		setReducedMotion,
+		registerCallbacks,
 		toggle,
-		centerDone,
-		scaleUpDone,
-		secondSpanHiddenDone,
-		scaleDownDone,
-		moveBackDone,
 		get
 	};
 }
@@ -216,11 +187,7 @@ function createProfileOverlay() {
 export const profileOverlay: Readable<OverlayState> & {
 	setBannerCount: (n: number) => void;
 	setReducedMotion: (v: boolean) => void;
+	registerCallbacks: (cbs: Partial<AnimationCallbacks>) => void;
 	toggle: () => Promise<void>;
-	centerDone: () => void;
-	scaleUpDone: () => void;
-	secondSpanHiddenDone: () => void;
-	scaleDownDone: () => void;
-	moveBackDone: () => void;
 	get: () => OverlayState;
 } = createProfileOverlay();

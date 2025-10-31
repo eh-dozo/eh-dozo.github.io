@@ -23,6 +23,7 @@
 		notifyCollapsed,
 		requestCollapseAndWait
 	} from '$lib/stores/bannerCoordinator';
+	import { profileOverlay } from '$lib/stores/profileOverlay';
 
 	type Paragraph = NonNullable<ProjectDetails['paragraphs']>[number];
 	type GalleryGroup = NonNullable<ProjectDetails['galleries']>[number];
@@ -119,7 +120,12 @@
 	const shouldApplyLoadingStyle = $derived(
 		Boolean($projectImagesStatus[imagesProjectId]?.loading) && clickedWhileLoading
 	);
-	const shouldDisablePointerEvent = $derived((clickedWhileLoading || isScrolling) && !isCentered());
+	const overlayState = $derived($profileOverlay);
+	const shouldDisablePointerEvent = $derived(
+		((clickedWhileLoading || isScrolling) && !isCentered()) ||
+			overlayState.animating ||
+			(overlayState.expanded && overlayState.phase !== 'idle')
+	);
 
 	const hoverCls = $derived(expanded ? '' : 'hover:project-banner-hover');
 
@@ -168,7 +174,6 @@
 		await requestCollapseAndWait(project.id);
 		notifyExpanded(project.id);
 
-		// Start image loading as early as possible
 		let imagesPromise: Promise<unknown> | null = null;
 		if (!imagesLoadedForProject) {
 			clickedWhileLoading = true;
@@ -250,7 +255,6 @@
 	);
 </script>
 
-<!-- TODO set smaller border radius when expanded -->
 <div
 	{@attach toButtonElement}
 	role="button"
