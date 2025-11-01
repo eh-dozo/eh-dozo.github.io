@@ -13,12 +13,12 @@
 	const paragraphs = $derived(text.split('\n').filter((p) => p.trim().length > 0));
 </script>
 
-<div class={`flex flex-col text-justify ${paragraphPaddings} py-4`}>
+<div class={`flex flex-col text-justify  ${paragraphPaddings} py-4`}>
 	{#if title}
 		<h3 class="text-[5.5lvw]">{title}</h3>
 	{/if}
 	{#each paragraphs as paragraph, index (index)}
-		<p class="pb-[3lvh] text-[2.5lvw] leading-none break-all">
+		<p class="pb-[3lvh] text-[2lvw] leading-none text-black mix-blend-difference">
 			{paragraph}
 		</p>
 	{/each}

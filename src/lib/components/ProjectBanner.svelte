@@ -15,7 +15,7 @@
 	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { ChevronsDownUp } from '@lucide/svelte';
-	import { circOut } from 'svelte/easing';
+	import { sineIn } from 'svelte/easing';
 	import {
 		registerBanner,
 		unregisterBanner,
@@ -127,8 +127,6 @@
 			(overlayState.expanded && overlayState.phase !== 'idle')
 	);
 
-	const hoverCls = $derived(expanded ? '' : 'hover:project-banner-hover');
-
 	const bannerMeta: string | string = $derived(
 		getEnhancedImageByPathOrName(project.image) as string | string
 	);
@@ -145,7 +143,12 @@
 		void ensureProjectImagesLoaded(imagesProjectId);
 	}
 
-	async function collapse() {
+	async function collapse(e?: MouseEvent | KeyboardEvent) {
+		// Stop event propagation to prevent parent handlers from firing
+		if (e) {
+			e.stopPropagation();
+		}
+
 		if (scrollContainer) {
 			try {
 				await animateScrollToTop(scrollContainer, 600);
@@ -269,8 +272,10 @@
 		: 'active:ease-[cubic-bezier(0, 0.55, 0.45, 1)] active:mx-[4lvw] active:mt-[2lvh] active:min-h-[57lvh] active:duration-150'}
 		{shouldApplyLoadingStyle ? 'animate-size-pulse' : ''} 
 		{shouldDisablePointerEvent ? 'pointer-events-none' : ''}
-		{expanded ? 'z-20 min-h-[80lvh] basis-[80lvh] cursor-default rounded-[0.5lvw]' : 'cursor-pointer'}
-		{hoverCls}"
+		{expanded
+		? 'z-20 min-h-[80lvh] basis-[80lvh] cursor-default rounded-[0.5lvw]'
+		: 'cursor-pointer hover:project-banner-hover'}
+		"
 	class:cursor-progress={shouldApplyLoadingStyle}
 	style="content-visibility:auto; 
 		contain-intrinsic-size: {expanded ? '80lvh 100%' : '60lvh 100%'}; 
@@ -291,11 +296,11 @@
 			role="button"
 			tabindex="0"
 			aria-label="Collapse"
-			class="sticky top-0 z-20 w-[2lvw] rotate-45 place-self-end rounded-full pt-[3lvh] pr-[3lvw]"
+			class="sticky top-[2lvh] right-0 z-20 m-[0.6lvw] w-auto rotate-45 cursor-pointer place-self-end rounded-full mix-blend-difference"
 			onclick={collapse}
 			onkeydown={onKeydownCollapse}
 		>
-			<ChevronsDownUp size={64} />
+			<ChevronsDownUp size={64} class="text-black" />
 		</div>
 	{/if}
 
@@ -330,7 +335,7 @@
 			{@const content = contentItems}
 			<div
 				class="relative z-10 mt-0 flex flex-col gap-4 pt-0"
-				in:fade={{ duration: 1000, easing: circOut }}
+				in:fade={{ duration: 200, delay: 500, easing: sineIn }}
 				out:fade={{ duration: 200 }}
 			>
 				<div>

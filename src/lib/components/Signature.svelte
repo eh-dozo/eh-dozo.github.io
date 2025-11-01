@@ -260,7 +260,7 @@
 <!-- Card wrapper with perspective for 3D flip -->
 <div
 	{@attach toBaseEl}
-	class="place-items-left absolute bottom-0 mr-[0.7lvw] mb-[1lvh] ml-[0.5lvw] grid h-auto w-auto overflow-visible rounded-sm text-left text-gray-600 mix-blend-difference select-none
+	class="place-items-left absolute bottom-0 mr-[0.7lvw] mb-[1lvh] ml-[0.5lvw] grid h-auto w-auto overflow-hidden rounded-sm text-left text-gray-600 mix-blend-difference select-none
 		{overlayAnimating || overlayExpanded ? 'z-30' : ''}
 		{isCardInteractive
 		? 'cursor-pointer'
@@ -299,7 +299,7 @@
 				style:opacity={active && !overlayExpanded && !overlayAnimating ? 0 : 1}
 			>
 				<span
-					class="pointer-events-none pl-[1lvw] text-6xl font-extralight tracking-wide
+					class="pointer-events-none pl-[1lvw] text-[2lvw] font-extralight tracking-wide
 						{overlayExpanded && !overlayAnimating ? 'pt-[1lvh]' : ''}"
 				>
 					Eliot Hoff<sup>&#169;</sup></span
@@ -308,14 +308,14 @@
 
 			{#if !isCardInteractive}
 				<div
-					class="col-start-1 row-start-1 flex flex-col-reverse pb-[0.7lvh] pl-[1lvw] align-middle transition-all duration-300 ease-out"
+					class="col-start-1 row-start-1 flex flex-col-reverse pr-[0.5lvw] pb-[0.7lvh] pl-[1lvw] align-middle transition-all duration-300 ease-out"
 					style:transform={active && !overlayExpanded && !overlayAnimating
 						? 'translateY(0%)'
 						: 'translateY(-100%)'}
 					style:opacity={active && !overlayExpanded && !overlayAnimating ? 1 : 0}
 				>
-					<span class="pointer-events-none text-xl font-light tracking-wide">
-						Running with:<br />SvelteKit, Vite, TailwindCSS.</span
+					<span class="pointer-events-none text-[0.8lvw] font-light tracking-wide">
+						Running with: Svelte (+Kit),<br />Vite, TailwindCSS.</span
 					>
 				</div>
 			{/if}

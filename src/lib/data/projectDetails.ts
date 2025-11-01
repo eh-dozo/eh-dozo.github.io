@@ -23,21 +23,11 @@ export const projectDetails: Record<string, ProjectDetails> = {
 			{
 				text: 'Environmental simulation / puzzle game\nTwo-semester academic group project in collaboration with NABU (Naturschutzbund Deutschland) Brandenburg\nContributions: Game Design, Game Code Implementation, 3D Models Animations',
 				textJustify: 'left'
-			} /* ,
-			{ */
-			/** write it more like:
-			 * - a line for the type of project -> environmental simulation / puzzle game
-			 * - "" "" "" -> two-semester academic group project in collaboration with NABU (Naturschutzbund Deutschland) Brandenburg
-			 * - "" "" "" -> Contributions: Game Design, Game Code Implementation, 3D Models Animations
-			 * - Remplacer groupe photo par TPose animaux
-			 */
-			/* text: 'A two-semester academic group project in collaboration with NABU (Naturschutzbund Deutschland) Brandenburg, with the goal to design and develop a environmental simulation / puzzle game.',
-				textJustify: 'right'
 			},
 			{
 				text: 'Following the IMI Showtime Summer 2024 presentation, I continued as a solo freelance developer to complete and deliver the final game to the organization.',
 				textJustify: 'left'
-			} */
+			}
 		],
 		galleries: [
 			{

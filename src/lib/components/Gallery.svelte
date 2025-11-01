@@ -8,10 +8,10 @@
 </script>
 
 <div
-	class="px-[2lvw] py-4"
-	style={`display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},auto);`}
+	class="grid px-[3lvw] py-4"
+	style={`grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},auto);`}
 >
 	{#each images as imageUrl (imageUrl)}
-		<enhanced:img src={imageUrl} alt="gallery image" class="place-self-center p-3" />
+		<enhanced:img src={imageUrl} alt="gallery image" class="place-self-center rounded-2xl p-3" />
 	{/each}
 </div>
