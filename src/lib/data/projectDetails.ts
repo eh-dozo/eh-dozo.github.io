@@ -86,7 +86,7 @@ export const projectDetails: Record<string, ProjectDetails> = {
 				textJustify: 'left'
 			},
 			{
-				text: 'Following the IMI Showtime Summer 2024 presentation, I continued as a solo freelance developer to complete and deliver the final game to the organization.',
+				text: 'Following the IMI Showtime Summer 2024 presentation, I continued as a solo freelance developer to complete and deliver the final game to the NABU.',
 				textJustify: 'left'
 			}
 		],

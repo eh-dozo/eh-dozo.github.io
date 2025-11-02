@@ -105,11 +105,9 @@
 				resolve();
 			};
 			const onEnd = () => {
-				console.log('transitionend did fire');
 				done();
 			};
 			el.addEventListener('transitionend', onEnd, { once: true });
-			console.log('transitionend did not fire');
 			setTimeout(done, maxMs);
 		});
 	}
