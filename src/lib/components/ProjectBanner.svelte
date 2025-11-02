@@ -356,7 +356,7 @@
 	<div
 		{@attach toScrollContainer}
 		class="absolute inset-0
-			{expanded ? 'h-full overflow-y-auto overscroll-contain' : ''}"
+			{expanded ? 'h-full overflow-x-hidden overflow-y-auto overscroll-contain' : ''}"
 	>
 		<div
 			class="relative right-[4lvw] left-[4lvw] pt-[5lvh] pb-[3lvh] text-balance transition-transform duration-500 ease-in-out"

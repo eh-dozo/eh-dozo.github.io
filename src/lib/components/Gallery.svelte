@@ -19,7 +19,7 @@
 		{:else if item.type === 'video'}
 			<video
 				src={item.src}
-				class="place-self-center rounded-2xl p-3"
+				class="place-self-center rounded-2xl p-3 w-full max-w-full h-auto"
 				autoplay
 				loop
 				muted
