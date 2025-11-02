@@ -1,7 +1,10 @@
 {
-	"name": "portfolio-spa",
+	"name": "eh-dozo.github.io",
 	"private": true,
 	"version": "0.0.1",
+	"author": "Eliot Hoff <eliot.hoff.contact@gmail.com>",
+	"description": "Personal web-portfolio application.",
+	"license": "Apache-2.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
