@@ -25,7 +25,7 @@
 </svelte:head>
 
 <enhanced:img
-	src="/src/lib/assets/bg-gogo.avif"
+	src="/src/lib/assets/bg-gogo.jpeg"
 	alt=""
 	aria-hidden="true"
 	class="pointer-events-none fixed inset-0 -z-10 size-full scale-(--html-bg-size) overflow-hidden object-cover blur-[5px]"
