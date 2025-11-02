@@ -107,13 +107,12 @@ export const projectDetails: Record<string, ProjectDetails> = {
 			},
 			{
 				maxRows: 1,
-				maxCols: 2,
+				maxCols: 1,
 				media: [
 					{
 						type: 'image',
 						src: './src/lib/assets/projects/aquasolace/aquasolace-outdoor-group-p.avif'
-					},
-					{ type: 'image', src: './src/lib/assets/projects/aquasolace/aquasolace-showtime-p.avif' }
+					}
 				]
 			}
 		]
