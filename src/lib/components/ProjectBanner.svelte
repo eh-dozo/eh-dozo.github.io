@@ -1,4 +1,5 @@
 <script lang="ts">
+	import sanitize from 'sanitize-html';
 	import type { ProjectData } from '$lib/data/projects';
 	import type { Attachment } from 'svelte/attachments';
 	import ParagraphBlock from '$lib/components/ParagraphBlock.svelte';
@@ -7,9 +8,11 @@
 	import type { ProjectDetails } from '$lib/data/projectDetails';
 	import {
 		ensureProjectImagesLoaded,
+		ensureProjectMediaLoaded,
 		projectImagesStatus,
 		getEnhancedImageByPathOrName,
-		getGalleryImages
+		getGalleryImages,
+		getGalleryMedia
 	} from '$lib/util/projectImages';
 	import { animateScrollToTop, getMainScroller, scrollElementToCenter } from '$lib/util/scroll';
 	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
@@ -114,6 +117,7 @@
 	let clickedWhileLoading: boolean = $state(false);
 	let clicked: boolean = $state(false);
 	let isScrolling: boolean = $state(false);
+	let videoElements: HTMLVideoElement[] = [];
 
 	const imagesLoadedForProject = $derived(Boolean($projectImagesStatus[imagesProjectId]?.loaded));
 	const expanded = $derived(clicked && imagesLoadedForProject);
@@ -141,10 +145,33 @@
 
 	function onMouseEnter() {
 		void ensureProjectImagesLoaded(imagesProjectId);
+		void ensureProjectMediaLoaded(imagesProjectId);
+	}
+
+	function waitForVideosReady(): Promise<void> {
+		if (videoElements.length === 0) {
+			return Promise.resolve();
+		}
+
+		const promises = videoElements.map((video) => {
+			return new Promise<void>((resolve) => {
+				if (video.readyState >= 3) {
+					// HAVE_FUTURE_DATA or better
+					resolve();
+				} else {
+					const onCanPlay = () => {
+						video.removeEventListener('canplaythrough', onCanPlay);
+						resolve();
+					};
+					video.addEventListener('canplaythrough', onCanPlay);
+				}
+			});
+		});
+
+		return Promise.all(promises).then(() => {});
 	}
 
 	async function collapse(e?: MouseEvent | KeyboardEvent) {
-		// Stop event propagation to prevent parent handlers from firing
 		if (e) {
 			e.stopPropagation();
 		}
@@ -161,6 +188,7 @@
 
 		clicked = false;
 		clickedWhileLoading = false;
+		videoElements = [];
 
 		dispatch('collapsed', { id: project.id });
 
@@ -172,15 +200,17 @@
 		notifyCollapsed(project.id);
 	}
 
-	// Expands only after both scroll-to-center and images load have finished
 	async function onClick() {
 		await requestCollapseAndWait(project.id);
 		notifyExpanded(project.id);
 
 		let imagesPromise: Promise<unknown> | null = null;
+		let mediaPromise: Promise<unknown> | null = null;
+
 		if (!imagesLoadedForProject) {
 			clickedWhileLoading = true;
 			imagesPromise = ensureProjectImagesLoaded(imagesProjectId);
+			mediaPromise = ensureProjectMediaLoaded(imagesProjectId);
 		}
 
 		if (!isCentered()) {
@@ -204,6 +234,27 @@
 			} catch {
 				/* empty */
 			}
+		}
+
+		if (mediaPromise) {
+			try {
+				await mediaPromise;
+			} catch {
+				/* empty */
+			}
+		}
+
+		// video auto-play tick delay
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		if (buttonElement) {
+			videoElements = Array.from(buttonElement.querySelectorAll('video'));
+		}
+
+		try {
+			await waitForVideosReady();
+		} catch {
+			/* empty */
 		}
 
 		clicked = true;
@@ -266,7 +317,7 @@
 	onmouseenter={onMouseEnter}
 	onclick={onClick}
 	onkeydown={onKeydownWrapper}
-	class="group relative isolate mx-[2lvw] min-h-[60lvh] snap-center snap-always overflow-hidden rounded-[1lvw] text-left transition-all duration-500 ease-in-out
+	class="group relative isolate mx-[2lvw] min-h-[60lvh] snap-center snap-always overflow-hidden rounded-[1lvw] text-left drop-shadow-lg transition-all duration-500 ease-in-out hover:drop-shadow-lg/50
 		{isNeighbordExpanded
 		? ''
 		: 'active:ease-[cubic-bezier(0, 0.55, 0.45, 1)] active:mx-[4lvw] active:mt-[2lvh] active:min-h-[57lvh] active:duration-150'}
@@ -285,7 +336,7 @@
 		src={bannerMeta}
 		alt={project.title}
 		class="absolute inset-0 -z-10 size-full object-cover transition-[filter] duration-200 ease-linear
-			{expanded ? 'blur-3xl' : 'blur-0'}"
+			{expanded ? 'blur-lg' : 'blur-0'}"
 		loading={priority ? 'eager' : 'lazy'}
 		fetchpriority={priority ? 'high' : 'auto'}
 		decoding="async"
@@ -300,7 +351,7 @@
 			onclick={collapse}
 			onkeydown={onKeydownCollapse}
 		>
-			<ChevronsDownUp size={64} class="text-black" />
+			<ChevronsDownUp size={64} class="text-white" />
 		</div>
 	{/if}
 
@@ -316,7 +367,8 @@
 				class="underline-gradient text-[9lvw] leading-[20vh] font-[550] tracking-tight text-white mix-blend-difference group-hover:underline-gradient-active
 					{shouldApplyLoadingStyle ? 'animate-opacity-pulse' : ''}"
 			>
-				{project.title}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html sanitize(project.title)}
 			</h2>
 		</div>
 
@@ -338,7 +390,7 @@
 				in:fade={{ duration: 200, delay: 500, easing: sineIn }}
 				out:fade={{ duration: 200 }}
 			>
-				<div>
+				<div class="mix-blend-difference">
 					{#each content as item (item.kind === 'paragraph' ? `p-${item.idx}` : `g-${item.idx}`)}
 						{#if item.kind === 'paragraph'}
 							<ParagraphBlock
@@ -347,11 +399,17 @@
 								textJustify={item.data.textJustify}
 							/>
 						{:else}
-							<Gallery
-								rows={item.data.maxRows}
-								cols={item.data.maxCols}
-								images={getGalleryImages(detailsForBanner.id, item.idx) ?? []}
-							/>
+							{@const mediaItems = getGalleryMedia(detailsForBanner.id, item.idx)}
+							{#if mediaItems && mediaItems.length > 0}
+								<Gallery rows={item.data.maxRows} cols={item.data.maxCols} media={mediaItems} />
+							{:else}
+								{@const imageItems = getGalleryImages(detailsForBanner.id, item.idx) ?? []}
+								<Gallery
+									rows={item.data.maxRows}
+									cols={item.data.maxCols}
+									media={imageItems.map((src) => ({ type: 'image' as const, src }))}
+								/>
+							{/if}
 						{/if}
 					{/each}
 				</div>

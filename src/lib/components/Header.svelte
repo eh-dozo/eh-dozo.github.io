@@ -20,7 +20,7 @@
 	{isPressed ? 'translate-y-5' : ''}"
 >
 	<div
-		class="absolute h-[19lvh] w-[7lvw] -translate-x-0.5 rounded-lg inset-shadow-xs inset-shadow-gray-200"
+		class="absolute h-[19lvh] w-[7lvw] -translate-x-0.5 rounded-lg inset-shadow-xs inset-shadow-gray-200 transition-shadow hover:inset-shadow-xs/50"
 	></div>
 	<button
 		type="button"

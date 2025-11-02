@@ -12,5 +12,5 @@
 
 @utility project-banner-hover {
 	margin: 0.5lvw;
-	box-shadow: 0px 0px 5px 0.1lvw #898989;
+	/* box-shadow: 0px 0px 5px 0.1lvw #000000; */
 }
