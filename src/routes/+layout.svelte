@@ -25,10 +25,10 @@
 </svelte:head>
 
 <enhanced:img
-	src="/src/lib/assets/bg-gogo.jpeg"
+	src="/src/lib/assets/bg.jpeg"
 	alt=""
 	aria-hidden="true"
-	class="pointer-events-none fixed inset-0 -z-10 size-full scale-(--html-bg-size) overflow-hidden object-cover blur-[5px]"
+	class="pointer-events-none fixed inset-0 -z-10 size-full scale-(--html-bg-size) overflow-hidden object-cover blur-[6px]"
 	style="object-position: center calc(var(--bg-y)); transform: translateZ(0); transform-origin: center;"
 	loading="eager"
 	fetchpriority="high"
