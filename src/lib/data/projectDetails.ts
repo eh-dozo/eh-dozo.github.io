@@ -68,10 +68,10 @@ export const projectDetails: Record<string, ProjectDetails> = {
 			},
 			{
 				text: 'The video above displays a demo of a game-experiment made using the LlamaRunner plugin which serve as a case study for my current master thesis. The paper aims to provide a empirical study on the usage of LLMs, more specifically local LLMs, as game design framework.'
-			},
+			} /* ,
 			{
 				text: '<i>Note: on a personal perspective, the goal of these projects is not to provide tools that should, in any way, replace existing jobs. Instead, they should provide an extension to our existing workflows.<i/>'
-			}
+			} */
 		],
 		galleries: [
 			{
