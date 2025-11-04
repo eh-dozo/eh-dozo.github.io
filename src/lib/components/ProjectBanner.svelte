@@ -362,7 +362,8 @@
 			class="relative right-[4lvw] left-[4lvw] pt-[5lvh] pb-[3lvh] text-balance transition-transform duration-500 ease-in-out"
 		>
 			<h2
-				class="underline-gradient text-[9lvw] leading-[20vh] font-[550] tracking-tight text-white mix-blend-difference group-hover:underline-gradient-active
+				class="underline-gradient text-[9lvw] leading-[20vh] font-[550] tracking-tight mix-blend-difference group-hover:underline-gradient-active
+					{project.titleColor ?? 'text-white'}
 					{shouldApplyLoadingStyle ? 'animate-opacity-pulse' : ''}"
 			>
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -373,7 +374,8 @@
 		{#if !expanded}
 			<div class="absolute right-[3lvw] bottom-[4lvh] text-right">
 				<span
-					class="underline-gradient text-[2lvw] font-light text-white mix-blend-difference group-hover:underline-gradient-active
+					class="underline-gradient text-[2lvw] font-normal mix-blend-difference group-hover:underline-gradient-active
+						{project.dateColor ?? 'text-white'}
 						{shouldApplyLoadingStyle ? 'animate-opacity-pulse' : ''}"
 					in:fade={{ duration: 350 }}
 					out:fade={{ duration: 100 }}>{project.dateSpan}</span

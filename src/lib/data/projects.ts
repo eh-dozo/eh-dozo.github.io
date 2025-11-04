@@ -3,6 +3,8 @@ export type ProjectData = Readonly<{
 	title: string;
 	dateSpan: string;
 	image: string;
+	titleColor?: string;
+	dateColor?: string;
 }>;
 
 export const projects: readonly ProjectData[] = [
@@ -16,12 +18,15 @@ export const projects: readonly ProjectData[] = [
 		id: 'works-on-llms',
 		title: 'Works on<br />LLMs <sup class="text-[5lvw]">(WIP)</sup>',
 		dateSpan: 'October 2024 - February 2026',
-		image: '/src/lib/assets/banners/banner-llm.avif'
+		image: '/src/lib/assets/banners/banner-llm.avif',
+		dateColor: 'text-lime-900'
 	},
 	{
 		id: 'aquasolace',
 		title: 'Aquasolace',
 		dateSpan: 'October 2023 - September 2024',
-		image: '/src/lib/assets/banners/banner-aquasolace.avif'
+		image: '/src/lib/assets/banners/banner-aquasolace.avif',
+		titleColor: 'text-rose-100',
+		dateColor: 'text-rose-300'
 	}
 ] as const;
