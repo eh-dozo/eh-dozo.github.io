@@ -286,7 +286,7 @@
 	>
 		<!-- Card - Front side -->
 		<div
-			class="card-face card-front grid rounded-sm pt-[1lvh] inset-shadow-xs inset-shadow-gray-200"
+			class="card-face card-front grid rounded-sm pt-[1lvh] mix-blend-difference inset-shadow-xs inset-shadow-[#EDEADE]"
 			class:absolute={isCardInteractive}
 			class:inset-0={isCardInteractive}
 			style:backface-visibility="hidden"
