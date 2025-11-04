@@ -260,7 +260,7 @@
 <!-- Card wrapper with perspective for 3D flip -->
 <div
 	{@attach toBaseEl}
-	class="place-items-left absolute bottom-0 mr-[0.7lvw] mb-[1lvh] ml-[0.5lvw] grid h-auto w-auto overflow-hidden rounded-sm text-left text-white mix-blend-difference select-none
+	class="place-items-left absolute bottom-0 mr-[0.7lvw] mb-[1lvh] ml-[0.5lvw] grid h-auto w-auto overflow-hidden rounded-sm text-left text-[#EDEADE] select-none
 		{overlayAnimating || overlayExpanded ? 'z-30' : ''}
 		{isCardInteractive
 		? 'cursor-pointer'
@@ -344,7 +344,7 @@
 		<!-- Card - Back side  -->
 		{#if isCardInteractive}
 			<div
-				class="card-face card-back absolute inset-0 flex items-center justify-center rounded-sm text-white inset-shadow-xs inset-shadow-purple-700"
+				class="card-face card-back absolute inset-0 flex items-center justify-center rounded-sm inset-shadow-xs inset-shadow-purple-700"
 				style:backface-visibility="hidden"
 				style:transform="rotateX(180deg)"
 			>
