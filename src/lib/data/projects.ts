@@ -5,6 +5,7 @@ export type ProjectData = Readonly<{
 	image: string;
 	titleColor?: string;
 	dateColor?: string;
+	titleBadge?: string;
 }>;
 
 export const projects: readonly ProjectData[] = [
@@ -16,10 +17,11 @@ export const projects: readonly ProjectData[] = [
 	},
 	{
 		id: 'works-on-llms',
-		title: 'Works on<br />LLMs <sup class="text-[5lvw]">(WIP)</sup>',
+		title: 'Works on<br />LLMs',
 		dateSpan: 'October 2024 - February 2026',
 		image: '/src/lib/assets/banners/banner-llm.avif',
-		dateColor: 'text-lime-900'
+		dateColor: 'text-lime-900',
+		titleBadge: 'WIP'
 	},
 	{
 		id: 'aquasolace',

@@ -368,6 +368,9 @@
 			>
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html sanitize(project.title)}
+				{#if project.titleBadge}
+					<span class="text-[5lvw]"><i>({project.titleBadge})</i></span>
+				{/if}
 			</h2>
 		</div>
 
