@@ -64,7 +64,7 @@ export const projectDetails: Record<string, ProjectDetails> = {
 		arrangement: 'paragraph-first',
 		paragraphs: [
 			{
-				text: 'LlamaRunner is an Unreal Engine 5 plugin that was developed during my second Independent Coursework at the HTW - Berlin.\nThe plugin integrates the llama.cpp library inside the game engine as a custom, configurable subsystem. It allows game developer to use local <i>(i.e. offline)</i> Large Language Models (LLMs) for game development and can be supported on some hardware & environments for packaging.'
+				text: '<Link url="https://github.com/Jofresh77/LlamaRunner">LlamaRunner</Link> is an Unreal Engine 5 plugin that was developed during my second Independent Coursework at the HTW - Berlin.\nThe plugin integrates the llama.cpp library inside the game engine as a custom, configurable subsystem. It allows game developer to use local <i>(i.e. offline)</i> Large Language Models (LLMs) for game development and can be supported on some hardware & environments for packaging.'
 			},
 			{
 				text: 'The video above displays a demo of a game-experiment made using the LlamaRunner plugin which serve as a case study for my current master thesis. The paper aims to provide a empirical study on the usage of LLMs, more specifically local LLMs, as game design framework.'
